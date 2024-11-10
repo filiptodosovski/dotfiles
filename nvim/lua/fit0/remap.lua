@@ -15,11 +15,19 @@ vim.keymap.set("i", "<Right>", "<nop>")
 -- Unbind ESC key, until I learn C-c
 vim.keymap.set("i", "<Esc>", "<nop>")
 
+-- clear search highlights
+vim.keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
+
+-- increment/decrement numbers
+vim.keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" }) -- increment
+vim.keymap.set("n", "<leader>-", "<C-x>", { desc = "Decrement number" }) -- decrement
+
 -- Reload all buffers at once
 vim.keymap.set("n", "<leader>ra", function()
   vim.cmd("bufdo e")
   print("Reloaded all buffers")
 end)
+
 vim.keymap.set("n", "<leader>rf", function()
   vim.cmd("bufdo e!")
   print("! Reloaded all buffers")
@@ -36,13 +44,6 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 
-vim.keymap.set("n", "<leader>vwm", function()
-  require("vim-with-me").StartVimWithMe()
-end)
-vim.keymap.set("n", "<leader>svwm", function()
-  require("vim-with-me").StopVimWithMe()
-end)
-
 -- greatest remap ever
 vim.keymap.set("x", "<leader>po", [["_dP]])
 
@@ -58,7 +59,6 @@ vim.keymap.set({ "n", "v" }, "<leader>P", [["+p]])
 
 vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 
--- This is going to get me cancelled
 vim.keymap.set("i", "<C-c>", "<Esc>")
 
 vim.keymap.set("n", "Q", "<nop>")
