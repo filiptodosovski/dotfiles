@@ -5,7 +5,7 @@ local theme = wezterm.plugin.require('https://github.com/neapsix/wezterm').main
 -- This will hold the configuration
 local config = wezterm.config_builder()
 
-config.font = wezterm.font("MesloLGS Nerd Font Mono")
+config.font = wezterm.font_with_fallback({"MonoLisa","MesloLGS Nerd Font Mono"})
 config.font_size = 20 
 
 config.enable_tab_bar = false
