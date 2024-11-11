@@ -12,7 +12,7 @@ after-login-command = []
 after-startup-command = []
 
 # Start AeroSpace at login
-start-at-login = true 
+start-at-login = true
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
 enable-normalization-flatten-containers = true
@@ -144,7 +144,7 @@ alt-shift-m = 'move-node-to-workspace M'
 alt-shift-t = 'move-node-to-workspace T'
 alt-shift-w = 'move-node-to-workspace W'
 
-alt-shit-f = 'fullscreen'
+alt-shift-f = 'fullscreen'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
 alt-tab = 'workspace-back-and-forth'
