@@ -1,0 +1,4 @@
+.nvimlog
+backups/**
+!backups/.gitkeep
+tmux-*.log

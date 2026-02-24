@@ -1,5 +1,7 @@
 return {
-  'nvim-telescope/telescope.nvim', tag = '0.1.8',
+  'nvim-telescope/telescope.nvim',
+  tag = '0.1.8',
+  cmd = "Telescope",
   -- or                            , branch = '0.1.x',
   dependencies = {
     { 'nvim-lua/plenary.nvim' },
@@ -8,9 +10,38 @@ return {
       dependencies = { "tpope/vim-fugitive" }
     }
   },
-  config = function ()
+  keys = {
+    { '<leader>pf', "<cmd>Telescope git_files<CR>" },
+    { '<leader>ff', "<cmd>Telescope find_files<CR>", desc = "Find Files" },
+    { '<C-p>', "<cmd>Telescope find_files<CR>" },
+    {
+      "<leader>ps",
+      function()
+        local ok, search = pcall(vim.fn.input, "Grep > ")
+        if not ok or search == nil or search == "" then
+          return
+        end
+        require('telescope.builtin').grep_string({ search = search })
+      end,
+      desc = "Grep with custom prompt"
+    },
+    { "<leader>pa", "<cmd>Telescope live_grep<CR>" },
+    { "<leader>fg", "<cmd>Telescope live_grep<CR>", desc = "Live Grep" },
+    { "<leader>fb", "<cmd>Telescope buffers<CR>", desc = "Find Buffers" },
+    { "<leader>fr", "<cmd>Telescope oldfiles<CR>", desc = "Recent Files" },
+    { '<leader>vh', "<cmd>Telescope help_tags<CR>" },
+    { '<S-p>', "<cmd>Telescope commands<CR>" },
+    {
+      '<leader>gh',
+      function()
+        local telescope = require('telescope')
+        telescope.load_extension("git_file_history")
+        telescope.extensions.git_file_history.git_file_history()
+      end
+    },
+  },
+  config = function()
     local telescope = require('telescope')
-    local builtin = require('telescope.builtin')
 
     telescope.setup({
       pickers = {
@@ -24,21 +55,5 @@ return {
         },
       },
     })
-
-    telescope.load_extension("git_file_history")
-    vim.keymap.set('n', '<leader>gh', telescope.extensions.git_file_history.git_file_history, {})
-
-    vim.keymap.set('n', '<leader>pf', builtin.git_files, {})
-    vim.keymap.set('n', '<C-p>', builtin.find_files, {})
-    vim.keymap.set('n', '<leader>ps', function()
-      builtin.grep_string({ search = vim.fn.input("Grep > ") })
-    end)
-    vim.keymap.set('n', "<leader>pa", builtin.live_grep, {})
-    vim.keymap.set('n', '<leader>vh', builtin.help_tags, {})
-
-    vim.keymap.set('n', '<leader>vh', builtin.help_tags, {})
-
-    vim.keymap.set('n', '<S-p>', "<cmd>Telescope commands<CR>")
   end
 }
-
