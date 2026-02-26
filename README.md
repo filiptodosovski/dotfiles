@@ -16,7 +16,6 @@ Personal terminal/editor environment for macOS and Linux with:
 - `starship/starship-core.toml`
 - `starship/starship-languages.toml`
 - `nvim/` (full Neovim config)
-- `scripts/dot-backup-keymaps.sh`
 
 ## Bootstrap
 
@@ -53,6 +52,7 @@ Core:
 Recommended:
 - `atuin`, `eza`, `lazygit`
 - LSP/format tools for TS: `vtsls`, `eslint_d`, `prettierd`, `prettier`
+- JS package manager: `yarn` (used by `:HealthTS`)
 
 ## Starship profiles
 
@@ -84,28 +84,22 @@ dot update
 dot doctor
 ```
 
-- Backup tmux + aerospace keymaps before experiments:
-
-```bash
-dot backup
-```
-
-## Backup workflow
-
-- Script: `scripts/dot-backup-keymaps.sh`
-- Output directory: `backups/`
-- tmux hotkey: `<prefix> B`
-- AeroSpace service mode key: `b`
-
 ## Neovim plugin stack highlights
 
 Added for productivity and TS workflows:
-- `which-key.nvim`
+- `harpoon`
 - `trouble.nvim`
 - `conform.nvim`
 - `nvim-lint`
 - `mini.ai`
 - `mini.surround`
-- `toggleterm.nvim`
+- `vim-test`
+- `lazygit.nvim`
 
-Formatting is now routed through `conform` in `<leader>f` and `:Format`, with LSP fallback.
+Formatting is routed through `conform` in `<leader>f` and `:Format`, with LSP fallback.
+
+Useful keys:
+- Neovim LazyGit: `<leader>gg` (also `<leader>lg`)
+- LazyGit current file: `<leader>gc`
+- Test nearest/file/last: `<leader>tn` / `<leader>tf` / `<leader>tl`
+- TS health check: `<leader>ch`

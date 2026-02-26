@@ -19,6 +19,9 @@ fi
 autoload -Uz compinit
 compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
 
+[[ -r /opt/homebrew/opt/fzf/shell/completion.zsh ]] && source /opt/homebrew/opt/fzf/shell/completion.zsh
+[[ -r /opt/homebrew/opt/fzf/shell/key-bindings.zsh ]] && source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
+
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 unset ZSH_AUTOSUGGEST_USE_ASYNC
 
@@ -38,13 +41,15 @@ bindkey '^[[B' history-search-forward
 # Better defaults
 command -v eza >/dev/null 2>&1 && alias ls="eza --icons=always"
 command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
-command -v bat >/dev/null 2>&1 && alias cat="bat --style=plain --paging=never"
+command -v bat >/dev/null 2>&1 && alias ccat="bat --style=plain --paging=never"
 command -v fd >/dev/null 2>&1 && alias ff="fd"
-command -v rg >/dev/null 2>&1 && alias grep="rg"
+command -v rg >/dev/null 2>&1 && alias rgf="rg --smart-case"
 command -v rga >/dev/null 2>&1 && alias pdfgrep="rga"
+command -v lazygit >/dev/null 2>&1 && alias lg="lazygit"
 
 # atuin history (if installed)
 command -v atuin >/dev/null 2>&1 && eval "$(atuin init zsh)"
+command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
 
 # Lazy-load nvm
 export NVM_DIR="$HOME/.nvm"
@@ -91,7 +96,7 @@ prompt-languages() {
 # dotfiles maintenance shortcuts
 _dot_doctor() {
   echo "OS: $(uname -s)"
-  for cmd in nvim tmux wezterm starship git rg fd bat zoxide; do
+  for cmd in nvim tmux wezterm starship git rg fd bat zoxide lazygit; do
     if command -v "$cmd" >/dev/null 2>&1; then
       printf "%-10s OK (%s)\n" "$cmd" "$(command -v "$cmd")"
     else
@@ -110,20 +115,15 @@ _dot_update() {
   fi
 }
 
-_dot_backup() {
-  "$DOTFILES_DIR/scripts/dot-backup-keymaps.sh"
-}
-
-# usage: dot update | dot doctor | dot backup | dot prompt-core | dot prompt-languages
+# usage: dot update | dot doctor | dot prompt-core | dot prompt-languages
 dot() {
   case "$1" in
     update) _dot_update ;;
     doctor) _dot_doctor ;;
-    backup) _dot_backup ;;
     prompt-core) prompt-core ;;
     prompt-languages) prompt-languages ;;
     *)
-      echo "Usage: dot {update|doctor|backup|prompt-core|prompt-languages}"
+      echo "Usage: dot {update|doctor|prompt-core|prompt-languages}"
       return 1
       ;;
   esac
@@ -131,4 +131,3 @@ dot() {
 
 alias dot-update='dot update'
 alias dot-doctor='dot doctor'
-alias dot-backup='dot backup'
