@@ -27,17 +27,6 @@ return {
     ---------------------------------------------------------------------------
     local formatting_augroup = vim.api.nvim_create_augroup("LspFormatting", {})
 
-    local function enable_format_on_save(bufnr)
-      vim.api.nvim_clear_autocmds({ group = formatting_augroup, buffer = bufnr })
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        group = formatting_augroup,
-        buffer = bufnr,
-        callback = function()
-          vim.lsp.buf.format()
-        end,
-      })
-    end
-
     ---------------------------------------------------------------------------
     -- LSP keymaps
     ---------------------------------------------------------------------------
@@ -46,18 +35,15 @@ return {
 
       vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
       vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-      vim.keymap.set("n", "<leader>vrr", vim.lsp.buf.references, opts)
       vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
       vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
       vim.keymap.set("n", "go", vim.lsp.buf.type_definition, opts)
       vim.keymap.set("n", "gs", vim.lsp.buf.signature_help, opts)
-      vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, opts)
 
       vim.keymap.set({ "n", "x" }, "<F3>", function()
         vim.lsp.buf.format({ async = true })
       end, opts)
 
-      vim.keymap.set("n", "<leader>vca", vim.lsp.buf.code_action, opts)
       vim.keymap.set("n", "gl", vim.diagnostic.open_float, opts)
     end
 

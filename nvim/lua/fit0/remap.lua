@@ -14,6 +14,7 @@ vim.keymap.set("i", "<Right>", "<nop>")
 
 -- clear search highlights
 vim.keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
+vim.keymap.set("n", "<Esc><Esc>", ":nohl<CR>", { desc = "Clear search highlights" })
 
 -- increment/decrement numbers
 vim.keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" }) -- increment
@@ -56,7 +57,6 @@ elseif vim.fn.executable("xsel") == 1 then
 elseif vim.fn.executable("xclip") == 1 then
   vim.cmd([[ command! Paste execute 'read !xclip -selection clipboard -o' ]])
 end
--- vim.keymap.set({ "n", "v" }, "<leader>pp", "<cmd>Paste<CR>")
 vim.keymap.set({ "n", "v" }, "<leader>P", [["+p]])
 
 vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
@@ -64,7 +64,6 @@ vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 vim.keymap.set("i", "<C-c>", "<Esc>")
 
 vim.keymap.set("n", "Q", "<nop>")
--- vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
 vim.keymap.set("n", "<leader>f", function()
   local ok, conform = pcall(require, "conform")
   if ok then
@@ -74,8 +73,6 @@ vim.keymap.set("n", "<leader>f", function()
   end
 end, { desc = "Format buffer" })
 
--- vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz")
--- vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")
 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
@@ -88,6 +85,7 @@ vim.keymap.set("n", "<leader>lr", "<cmd>Trouble lsp_references toggle<cr>", { de
 
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 vim.keymap.set("n", "<leader>cx", "<cmd>!chmod +x %<CR>", { silent = true, desc = "Chmod +x current file" })
+vim.keymap.set("n", "<leader>ch", "<cmd>HealthTS<CR>", { desc = "TS Health (fmt/lint/typecheck)" })
 
 vim.api.nvim_create_user_command("Format", function()
   local ok, conform = pcall(require, "conform")
@@ -97,6 +95,42 @@ vim.api.nvim_create_user_command("Format", function()
     vim.lsp.buf.format()
   end
 end, {})
+
+vim.api.nvim_create_user_command("HealthTS", function()
+  local root = vim.fs.root(0, { "package.json", ".git" }) or vim.fn.getcwd()
+  local package_json = root .. "/package.json"
+
+  if vim.fn.filereadable(package_json) == 0 then
+    vim.notify("HealthTS: package.json not found in project root", vim.log.levels.WARN)
+    return
+  end
+
+  local package_lines = vim.fn.readfile(package_json)
+  local ok, package_data = pcall(vim.json.decode, table.concat(package_lines, "\n"))
+  if not ok or type(package_data) ~= "table" then
+    vim.notify("HealthTS: could not parse package.json", vim.log.levels.ERROR)
+    return
+  end
+
+  local scripts = type(package_data.scripts) == "table" and package_data.scripts or {}
+  local wanted = { "format", "lint", "typecheck" }
+  local commands = {}
+
+  for _, script in ipairs(wanted) do
+    if scripts[script] ~= nil then
+      table.insert(commands, "yarn run -s " .. script)
+    end
+  end
+
+  if #commands == 0 then
+    vim.notify("HealthTS: no format/lint/typecheck scripts found", vim.log.levels.WARN)
+    return
+  end
+
+  vim.cmd("botright 12split")
+  vim.cmd("terminal cd " .. vim.fn.shellescape(root) .. " && " .. table.concat(commands, " && "))
+end, { desc = "Run format, lint, typecheck in project root" })
+
 vim.keymap.set("n", "<C-Y>", "<cmd>Neotree toggle <cr>")
 vim.keymap.set("n", "<leader>rv", "<cmd>Neotree reveal<cr>", { desc = "Reveal the active file in the tree" })
 

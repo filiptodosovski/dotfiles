@@ -10,6 +10,7 @@ return {
       })
 
       vim.keymap.set('n', "<leader>gp", ":Gitsigns preview_hunk<CR>", {})
+      vim.keymap.set('n', "<leader>gs", ":Gitsigns stage_hunk<CR>", { desc = "Stage Hunk" })
     end
   },
   {
@@ -33,7 +34,10 @@ return {
     -- setting the keybinding for LazyGit with 'keys' is recommended in
     -- order to load the plugin when the command is run for the first time
     keys = {
-      { "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" }
+      { "<leader>gg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
+      { "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
+      { "<leader>gc", "<cmd>LazyGitCurrentFile<cr>", desc = "LazyGit Current File" },
+      { "<leader>gf", "<cmd>LazyGitFilterCurrentFile<cr>", desc = "LazyGit Filter Current File" },
     }
   }
 }
