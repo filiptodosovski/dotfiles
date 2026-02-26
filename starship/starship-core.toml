@@ -1,9 +1,9 @@
 format = """
-$directory$git_branch$git_status$cmd_duration
+$directory$git_branch$git_status$nodejs$cmd_duration
 $character
 """
 
-add_newline = false
+add_newline = true
 
 [character]
 success_symbol = "[>](bold green)"

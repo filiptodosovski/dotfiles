@@ -3,7 +3,7 @@ $directory$git_branch$git_status$nodejs$package$python$golang$rust$cmd_duration
 $character
 """
 
-add_newline = false
+add_newline = true
 
 [character]
 success_symbol = "[>](bold green)"
