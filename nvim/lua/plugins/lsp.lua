@@ -3,12 +3,33 @@ return {
   dependencies = {
     { "williamboman/mason.nvim" },
     { "williamboman/mason-lspconfig.nvim" },
+    { "SmiteshP/nvim-navic" },
+    { "saghen/blink.cmp" },
+    { "b0o/SchemaStore.nvim", lazy = true, version = false },
   },
   config = function()
     ---------------------------------------------------------------------------
     -- Mason
     ---------------------------------------------------------------------------
     require("mason").setup()
+    require("mason-lspconfig").setup({
+      ensure_installed = {
+        "vtsls",
+        "eslint",
+        "gopls",
+        "lua_ls",
+        "rust_analyzer",
+        "tailwindcss",
+        "pyright",
+        "clangd",
+        "html",
+        "terraformls",
+        "prismals",
+        "jsonls",
+        "yamlls",
+      },
+      automatic_installation = false,
+    })
 
     ---------------------------------------------------------------------------
     -- Diagnostics signs
@@ -47,10 +68,14 @@ return {
       vim.keymap.set("n", "gl", vim.diagnostic.open_float, opts)
     end
 
-    -- helper to build on_attach with optional extra behaviour
+    local navic_ok, navic = pcall(require, "nvim-navic")
+
     local function make_on_attach(extra)
       return function(client, bufnr)
         set_default_keymaps(bufnr)
+        if navic_ok and client.server_capabilities.documentSymbolProvider then
+          pcall(navic.attach, client, bufnr)
+        end
         if extra then
           extra(client, bufnr)
         end
@@ -60,7 +85,11 @@ return {
     ---------------------------------------------------------------------------
     -- Capabilities
     ---------------------------------------------------------------------------
-    local capabilities = require("cmp_nvim_lsp").default_capabilities()
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
+    local ok_blink, blink = pcall(require, "blink.cmp")
+    if ok_blink then
+      capabilities = blink.get_lsp_capabilities(capabilities)
+    end
 
     ---------------------------------------------------------------------------
     -- Servers with custom configs
@@ -182,6 +211,33 @@ return {
         end,
         settings = { Lua = {} },
       },
+
+      jsonls = {
+        capabilities = capabilities,
+        on_attach = make_on_attach(),
+        settings = {
+          json = {
+            schemas = require("schemastore").json.schemas(),
+            validate = { enable = true },
+          },
+        },
+      },
+
+      yamlls = {
+        capabilities = capabilities,
+        on_attach = make_on_attach(),
+        settings = {
+          yaml = {
+            schemaStore = {
+              -- disable built-in schema store to use SchemaStore.nvim instead
+              enable = false,
+              url = "",
+            },
+            schemas = require("schemastore").yaml.schemas(),
+            validate = true,
+          },
+        },
+      },
     }
 
     -- register + enable servers with custom config
@@ -219,6 +275,15 @@ return {
     ---------------------------------------------------------------------------
     vim.diagnostic.config({
       virtual_text = false,
+      virtual_lines = { current_line = true },
+      severity_sort = true,
     })
+
+    vim.keymap.set("n", "<leader>e", function()
+      local cur = vim.diagnostic.config().virtual_lines
+      vim.diagnostic.config({
+        virtual_lines = not cur and { current_line = true } or false,
+      })
+    end, { desc = "Toggle diagnostic virtual_lines" })
   end,
 }

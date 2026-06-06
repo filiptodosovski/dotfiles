@@ -25,10 +25,15 @@ return {
                     { "filename", path = 1, symbols = { modified = "  ", readonly = "", unnamed = "" } },
                     {
                         function()
-                            return require("nvim-navic").get_location()
+                            local ok, navic = pcall(require, "nvim-navic")
+                            if ok and navic.is_available() then
+                                return navic.get_location()
+                            end
+                            return ""
                         end,
                         cond = function()
-                            return package.loaded["nvim-navic"] and require("nvim-navic").is_available()
+                            local ok, navic = pcall(require, "nvim-navic")
+                            return ok and navic.is_available()
                         end,
                     },
                 },
