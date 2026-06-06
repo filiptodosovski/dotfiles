@@ -7,17 +7,49 @@ OS_NAME="$(uname -s)"
 if [ "$OS_NAME" = "Darwin" ]; then
   [[ -r /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
   [[ -r /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-  [[ -r /opt/homebrew/share/fzf-tab/fzf-tab.plugin.zsh ]] && source /opt/homebrew/share/fzf-tab/fzf-tab.plugin.zsh
   [[ -d /opt/homebrew/share/zsh-completions ]] && fpath=(/opt/homebrew/share/zsh-completions $fpath)
 elif [ "$OS_NAME" = "Linux" ]; then
   [[ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
   [[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-  [[ -r /usr/share/fzf-tab/fzf-tab.plugin.zsh ]] && source /usr/share/fzf-tab/fzf-tab.plugin.zsh
   [[ -d /usr/share/zsh/site-functions ]] && fpath=(/usr/share/zsh/site-functions $fpath)
 fi
 
+# fzf-tab (install with: git clone --depth 1 https://github.com/Aloxaf/fzf-tab ~/.local/share/fzf-tab)
+for _fzf_tab_path in \
+  "$HOME/.local/share/fzf-tab/fzf-tab.plugin.zsh" \
+  /opt/homebrew/share/fzf-tab/fzf-tab.plugin.zsh \
+  /usr/share/fzf-tab/fzf-tab.plugin.zsh; do
+  if [[ -r "$_fzf_tab_path" ]]; then
+    source "$_fzf_tab_path"
+    break
+  fi
+done
+unset _fzf_tab_path
+
 autoload -Uz compinit
 compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+
+# Allow bash-style completions (needed for tools like aws, terraform, gcloud
+# that ship a `_completer` binary instead of zsh completion files).
+autoload -Uz bashcompinit && bashcompinit
+
+# Register completions for common tools that need it.
+command -v aws_completer >/dev/null 2>&1 && complete -C aws_completer aws
+command -v terraform     >/dev/null 2>&1 && complete -o nospace -C "$(command -v terraform)" terraform
+command -v gh            >/dev/null 2>&1 && eval "$(gh completion -s zsh 2>/dev/null)"
+
+# Enable the menu picker (used as a fallback when fzf-tab isn't intercepting).
+zstyle ':completion:*' menu select
+LISTMAX=0
+zstyle ':completion:*' list-prompt   ''
+zstyle ':completion:*' select-prompt ''
+
+# fzf-tab: ensure it's enabled (sourced above) and configure the picker UI.
+(( $+functions[enable-fzf-tab] )) && enable-fzf-tab
+zstyle ':fzf-tab:*' fzf-flags --height=50% --layout=reverse --border --info=inline --cycle
+zstyle ':fzf-tab:*' switch-group ',' '.'
+
+setopt auto_cd interactive_comments
 
 [[ -r /opt/homebrew/opt/fzf/shell/completion.zsh ]] && source /opt/homebrew/opt/fzf/shell/completion.zsh
 [[ -r /opt/homebrew/opt/fzf/shell/key-bindings.zsh ]] && source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
@@ -26,12 +58,16 @@ command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 unset ZSH_AUTOSUGGEST_USE_ASYNC
 
 # history setup
-HISTFILE=$HOME/.zhistory
-SAVEHIST=1000
-HISTSIZE=999
+HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"
+mkdir -p "${HISTFILE:h}"
+HISTSIZE=50000
+SAVEHIST=50000
 setopt share_history
+setopt extended_history
 setopt hist_expire_dups_first
 setopt hist_ignore_dups
+setopt hist_ignore_space
+setopt hist_reduce_blanks
 setopt hist_verify
 
 # completion using arrow keys (based on history)
@@ -47,40 +83,21 @@ command -v rg >/dev/null 2>&1 && alias rgf="rg --smart-case"
 command -v rga >/dev/null 2>&1 && alias pdfgrep="rga"
 command -v lazygit >/dev/null 2>&1 && alias lg="lazygit"
 
-# atuin history (if installed)
-command -v atuin >/dev/null 2>&1 && eval "$(atuin init zsh)"
 command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
+command -v atuin >/dev/null 2>&1 && eval "$(atuin init zsh --disable-up-arrow)"
 
 # Lazy-load nvm
 export NVM_DIR="$HOME/.nvm"
 if [ -s "$NVM_DIR/nvm.sh" ]; then
-  nvm() {
+  _nvm_load() {
     unset -f nvm node npm npx
     \. "$NVM_DIR/nvm.sh"
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-    nvm "$@"
   }
-
-  node() {
-    unset -f nvm node npm npx
-    \. "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-    node "$@"
-  }
-
-  npm() {
-    unset -f nvm node npm npx
-    \. "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-    npm "$@"
-  }
-
-  npx() {
-    unset -f nvm node npm npx
-    \. "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-    npx "$@"
-  }
+  for _cmd in nvm node npm npx; do
+    eval "${_cmd}() { _nvm_load; ${_cmd} \"\$@\"; }"
+  done
+  unset _cmd
 fi
 
 prompt-core() {
@@ -96,11 +113,17 @@ prompt-languages() {
 # dotfiles maintenance shortcuts
 _dot_doctor() {
   echo "OS: $(uname -s)"
-  for cmd in nvim tmux wezterm starship git rg fd bat zoxide lazygit; do
+  local tools=(
+    nvim tmux wezterm starship git
+    rg fd bat fzf zoxide eza lazygit atuin direnv
+    vtsls eslint_d prettierd prettier stylua shfmt taplo
+    ruff black yarn
+  )
+  for cmd in "${tools[@]}"; do
     if command -v "$cmd" >/dev/null 2>&1; then
-      printf "%-10s OK (%s)\n" "$cmd" "$(command -v "$cmd")"
+      printf "%-12s OK (%s)\n" "$cmd" "$(command -v "$cmd")"
     else
-      printf "%-10s MISSING\n" "$cmd"
+      printf "%-12s MISSING\n" "$cmd"
     fi
   done
 }
@@ -131,3 +154,9 @@ dot() {
 
 alias dot-update='dot update'
 alias dot-doctor='dot doctor'
+
+# Tab always opens the fzf-tab interactive picker (no autosuggestion accept).
+# Right arrow (default zsh-autosuggestions binding) accepts the ghost text.
+if (( $+widgets[fzf-tab-complete] )); then
+  bindkey '^I' fzf-tab-complete
+fi
