@@ -27,6 +27,7 @@ config.keys = {
   { key = "z", mods = "LEADER", action = act.TogglePaneZoomState },
   { key = "[", mods = "LEADER", action = act.ActivateCopyMode },
   { key = "y", mods = "LEADER", action = act.CopyTo("Clipboard") },
+  { key = " ", mods = "CMD", action = act.SendKey({ key = "Space", mods = "CTRL" }) },
 }
 
 config.key_tables = {
