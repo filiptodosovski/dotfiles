@@ -93,6 +93,9 @@ Added for productivity and TS workflows:
 - `nvim-lint`
 - `mini.ai`
 - `mini.surround`
+- `mini.pairs`
+- `mini.comment` (+ `nvim-ts-context-commentstring` for JSX/TSX)
+- `nvim-navic` (LSP breadcrumbs in lualine)
 - `vim-test`
 - `lazygit.nvim`
 

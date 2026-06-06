@@ -131,7 +131,6 @@ vim.api.nvim_create_user_command("HealthTS", function()
   vim.cmd("terminal cd " .. vim.fn.shellescape(root) .. " && " .. table.concat(commands, " && "))
 end, { desc = "Run format, lint, typecheck in project root" })
 
-vim.keymap.set("n", "<C-Y>", "<cmd>Neotree toggle <cr>")
 vim.keymap.set("n", "<leader>rv", "<cmd>Neotree reveal<cr>", { desc = "Reveal the active file in the tree" })
 
 -- open float window for errors

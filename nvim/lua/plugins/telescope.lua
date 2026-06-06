@@ -1,3 +1,5 @@
+local last_grep_search = nil
+
 return {
   'nvim-telescope/telescope.nvim',
   tag = '0.1.8',
@@ -21,9 +23,21 @@ return {
         if not ok or search == nil or search == "" then
           return
         end
+        last_grep_search = search
         require('telescope.builtin').grep_string({ search = search })
       end,
       desc = "Grep with custom prompt"
+    },
+    {
+      "<leader>pr",
+      function()
+        if not last_grep_search or last_grep_search == "" then
+          vim.notify("No previous grep search", vim.log.levels.WARN)
+          return
+        end
+        require('telescope.builtin').grep_string({ search = last_grep_search })
+      end,
+      desc = "Repeat last grep"
     },
     { "<leader>pa", "<cmd>Telescope live_grep<CR>" },
     { "<leader>fg", "<cmd>Telescope live_grep<CR>", desc = "Live Grep" },
