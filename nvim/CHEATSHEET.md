@@ -42,9 +42,8 @@
 - Git file history: `<leader>gh`
 
 ## Neo-tree
-- Toggle tree: `<C-Y>`
+- Reveal tree on the right: `<C-b>`
 - Reveal current file: `<leader>rv`
-- Reveal right (plugin key): `<C-b>`
 
 ## LSP and diagnostics
 - Hover: `K`
@@ -61,6 +60,12 @@
 - Format: `<leader>f` or `<F3>`
 - Toggle `lsp_lines`: `<leader>e`
 - Select TS workspace version: `<leader>cV`
+
+## Completion (JS/TS, Python, and other LSP buffers)
+- Show completion/docs: `<C-Space>`
+- Next/previous suggestion: `<C-n>` / `<C-p>`
+- Accept selected suggestion: `<C-y>`
+- Accept suggestion or insert newline: `<CR>`
 
 ## Trouble
 - Diagnostics panel: `<leader>xx`
@@ -99,5 +104,5 @@
 - Increment/decrement number: `<leader>+` / `<leader>-`
 - Next/prev location list item: `<leader>k` / `<leader>j`
 - Make file executable: `<leader>cx`
-- TS health checks: `<leader>ch`
+- TS health checks (format check/lint/types/tests): `<leader>ch`
 - Commands: `:Format`, `:HealthTS`

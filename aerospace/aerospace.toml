@@ -1,6 +1,12 @@
 # Symlink this file to ~/.config/aerospace/aerospace.toml
 # Example: ln -sf ~/.dotfiles/aerospace/aerospace.toml ~/.config/aerospace/aerospace.toml
 
+# Config version for compatibility and deprecations.
+# Version 2 no longer infers persistent workspaces from key bindings, so keep
+# the workspaces used below explicitly alive.
+config-version = 2
+persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'B', 'D', 'I', 'M', 'O', 'R', 'T', 'W']
+
 # You can use it to add commands that run after login to macOS user session.
 # 'start-at-login' needs to be 'true' for 'after-login-command' to work
 # Available commands: https://nikitabobko.github.io/AeroSpace/commands

@@ -57,7 +57,7 @@ return {
                 },
 
             },
-            extensions = { "nvim-tree", "lazy" },
+            extensions = { "neo-tree", "lazy" },
         }
     end,
 }

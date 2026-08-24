@@ -1,29 +1,67 @@
+local parsers = {
+  "bash",
+  "c",
+  "clojure",
+  "css",
+  "go",
+  "html",
+  "javascript",
+  "json",
+  "lua",
+  "markdown",
+  "markdown_inline",
+  "python",
+  "query",
+  "rust",
+  "tsx",
+  "typescript",
+  "vim",
+  "vimdoc",
+}
+
+local filetypes = {
+  "bash",
+  "c",
+  "clojure",
+  "css",
+  "go",
+  "html",
+  "javascript",
+  "javascriptreact",
+  "json",
+  "jsonc",
+  "lua",
+  "markdown",
+  "python",
+  "query",
+  "rust",
+  "typescript",
+  "typescriptreact",
+  "vim",
+  "vimdoc",
+}
+
 return {
-  'nvim-treesitter/nvim-treesitter',
+  "nvim-treesitter/nvim-treesitter",
+  branch = "main",
+  lazy = false,
   build = ":TSUpdate",
-  event = { "BufReadPost", "BufNewFile" },
-  config = function ()
-    require 'nvim-treesitter.configs'.setup {
-      -- A list of parser names, or "all"
-      ensure_installed = { "javascript", "typescript", "c", "lua", "rust", 'python', "go", "html", "clojure" },
+  config = function(plugin)
+    -- The main branch stores highlight queries below runtime/. Existing parsers
+    -- migrated from the old branch may not have those query links yet.
+    vim.opt.runtimepath:append(plugin.dir .. "/runtime")
 
-      -- Install parsers synchronously (only applied to `ensure_installed`)
-      sync_install = false,
+    local treesitter = require("nvim-treesitter")
+    treesitter.setup({})
+    treesitter.install(parsers)
 
-      -- Automatically install missing parsers when entering buffer
-      -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-      auto_install = true,
-
-      highlight = {
-        -- `false` will disable the whole extension
-        enable = true,
-
-        -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-        -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-        -- Using this option may slow down your editor, and you may see some duplicate highlights.
-        -- Instead of true it can also be a list of languages
-        additional_vim_regex_highlighting = false,
-      },
-    }
-  end
+    local group = vim.api.nvim_create_augroup("Fit0Treesitter", { clear = true })
+    vim.api.nvim_create_autocmd("FileType", {
+      group = group,
+      pattern = filetypes,
+      callback = function(args)
+        pcall(vim.treesitter.start, args.buf)
+      end,
+    })
+  end,
 }

@@ -4,7 +4,13 @@ local act = wezterm.action
 
 local config = wezterm.config_builder()
 
-config.font = wezterm.font_with_fallback({ "MonoLisa", "MesloLGS Nerd Font Mono" })
+-- MonoLisa is installed in the user font directory but is not registered with
+-- CoreText on every launch, so make it discoverable to WezTerm explicitly.
+config.font_dirs = { wezterm.home_dir .. "/Library/Fonts" }
+config.font = wezterm.font_with_fallback({
+  { family = "MonoLisa", weight = "Regular" },
+  { family = "MesloLGS Nerd Font Mono", weight = "Regular" },
+})
 config.font_size = 20
 
 config.enable_tab_bar = false

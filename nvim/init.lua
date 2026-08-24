@@ -14,5 +14,6 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Order matters
 require("fit0")
-require('lazy').setup('plugins')
-
+require("lazy").setup("plugins", {
+  rocks = { enabled = false },
+})
