@@ -3,6 +3,7 @@ return {
   event = "InsertEnter",
   version = "*", -- use latest tagged release; ships precompiled fuzzy matcher
   dependencies = {
+    "rafamadriz/friendly-snippets",
     {
       "L3MON4D3/LuaSnip",
       version = "v2.*",

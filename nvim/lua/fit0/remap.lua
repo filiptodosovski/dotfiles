@@ -67,7 +67,7 @@ vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "<leader>f", function()
   local ok, conform = pcall(require, "conform")
   if ok then
-    conform.format({ lsp_fallback = true })
+    conform.format({ lsp_format = "fallback" })
   else
     vim.lsp.buf.format()
   end
@@ -75,22 +75,41 @@ end, { desc = "Format buffer" })
 
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
-vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev Diagnostic" })
+vim.keymap.set("n", "]d", function()
+  vim.diagnostic.jump({ count = 1, float = true })
+end, { desc = "Next Diagnostic" })
+vim.keymap.set("n", "[d", function()
+  vim.diagnostic.jump({ count = -1, float = true })
+end, { desc = "Prev Diagnostic" })
 vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename Symbol" })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
 vim.keymap.set("n", "<leader>ld", vim.lsp.buf.definition, { desc = "LSP Definition" })
 vim.keymap.set("n", "<leader>li", vim.lsp.buf.implementation, { desc = "LSP Implementation" })
-vim.keymap.set("n", "<leader>lr", "<cmd>Trouble lsp_references toggle<cr>", { desc = "LSP References (Trouble)" })
+vim.keymap.set(
+  "n",
+  "<leader>lr",
+  "<cmd>Trouble lsp_references toggle<cr>",
+  { desc = "LSP References (Trouble)" }
+)
 
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
-vim.keymap.set("n", "<leader>cx", "<cmd>!chmod +x %<CR>", { silent = true, desc = "Chmod +x current file" })
-vim.keymap.set("n", "<leader>ch", "<cmd>HealthTS<CR>", { desc = "TS Health (fmt/lint/typecheck)" })
+vim.keymap.set(
+  "n",
+  "<leader>cx",
+  "<cmd>!chmod +x %<CR>",
+  { silent = true, desc = "Chmod +x current file" }
+)
+vim.keymap.set(
+  "n",
+  "<leader>ch",
+  "<cmd>HealthTS<CR>",
+  { desc = "TS Health (check/lint/types/tests)" }
+)
 
 vim.api.nvim_create_user_command("Format", function()
   local ok, conform = pcall(require, "conform")
   if ok then
-    conform.format({ lsp_fallback = true })
+    conform.format({ lsp_format = "fallback" })
   else
     vim.lsp.buf.format()
   end
@@ -113,28 +132,63 @@ vim.api.nvim_create_user_command("HealthTS", function()
   end
 
   local scripts = type(package_data.scripts) == "table" and package_data.scripts or {}
-  local wanted = { "format", "lint", "typecheck" }
+  local wanted = { "format:check", "lint", "typecheck", "test" }
   local commands = {}
+
+  local package_manager = type(package_data.packageManager) == "string"
+      and package_data.packageManager:match("^([^@]+)")
+    or nil
+
+  if not package_manager then
+    local lockfiles = {
+      { "pnpm-lock.yaml", "pnpm" },
+      { "bun.lock", "bun" },
+      { "bun.lockb", "bun" },
+      { "yarn.lock", "yarn" },
+      { "package-lock.json", "npm" },
+    }
+    for _, lockfile in ipairs(lockfiles) do
+      if vim.fn.filereadable(root .. "/" .. lockfile[1]) == 1 then
+        package_manager = lockfile[2]
+        break
+      end
+    end
+  end
+
+  package_manager = package_manager or "npm"
+  if not vim.tbl_contains({ "pnpm", "bun", "yarn", "npm" }, package_manager) then
+    vim.notify("HealthTS: unsupported package manager " .. package_manager, vim.log.levels.ERROR)
+    return
+  end
+  if vim.fn.executable(package_manager) == 0 then
+    vim.notify("HealthTS: " .. package_manager .. " is not installed", vim.log.levels.ERROR)
+    return
+  end
 
   for _, script in ipairs(wanted) do
     if scripts[script] ~= nil then
-      table.insert(commands, "yarn run -s " .. script)
+      table.insert(commands, package_manager .. " run --silent " .. script)
     end
   end
 
   if #commands == 0 then
-    vim.notify("HealthTS: no format/lint/typecheck scripts found", vim.log.levels.WARN)
+    vim.notify("HealthTS: no format:check/lint/typecheck/test scripts found", vim.log.levels.WARN)
     return
   end
 
   vim.cmd("botright 12split")
   vim.cmd("terminal cd " .. vim.fn.shellescape(root) .. " && " .. table.concat(commands, " && "))
-end, { desc = "Run format, lint, typecheck in project root" })
+end, { desc = "Run non-mutating JS/TS project health checks" })
 
-vim.keymap.set("n", "<leader>rv", "<cmd>Neotree reveal<cr>", { desc = "Reveal the active file in the tree" })
+vim.keymap.set(
+  "n",
+  "<leader>rv",
+  "<cmd>Neotree reveal<cr>",
+  { desc = "Reveal the active file in the tree" }
+)
 
 -- open float window for errors
-vim.keymap.set('n', '<leader>q', function()
+vim.keymap.set("n", "<leader>q", function()
   vim.diagnostic.open_float(nil, { scope = "cursor", focusable = true })
 end, { noremap = true, silent = true, desc = "Show diagnostics at cursor" })
 
@@ -142,4 +196,9 @@ end, { noremap = true, silent = true, desc = "Show diagnostics at cursor" })
 vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
 vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
 vim.keymap.set("n", "<leader>bdd", "<cmd>:bd<cr>", { desc = "Delete Buffer" })
-vim.keymap.set("n", "<leader>bda", "<cmd>:%bd|e#|bd#<cr>", { desc = "Delete All Buffers But This One" })
+vim.keymap.set(
+  "n",
+  "<leader>bda",
+  "<cmd>:%bd|e#|bd#<cr>",
+  { desc = "Delete All Buffers But This One" }
+)

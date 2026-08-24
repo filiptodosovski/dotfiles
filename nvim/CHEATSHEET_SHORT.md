@@ -15,6 +15,11 @@
 - Next/prev diagnostic: `]d` / `[d`
 - Diagnostics panel: `<leader>xx`
 
+## Completion
+- Show menu/docs: `<C-Space>`
+- Next/previous: `<C-n>` / `<C-p>`
+- Accept: `<C-y>` or `<CR>`
+
 ## Harpoon
 - Add file: `<leader>ha`
 - Menu: `<leader>hh`
@@ -34,5 +39,4 @@
 ## Buffers and tree
 - Next/prev buffer: `<S-l>` / `<S-h>`
 - Delete buffer: `<leader>bdd`
-- Toggle Neo-tree: `<C-Y>`
-
+- Reveal Neo-tree on the right: `<C-b>`

@@ -1,6 +1,6 @@
 export DOTFILES_DIR="$HOME/.dotfiles"
 export STARSHIP_CONFIG="${STARSHIP_CONFIG:-$HOME/.config/starship/starship-core.toml}"
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.local/share/nvim/mason/bin:$PATH"
 
 OS_NAME="$(uname -s)"
 
@@ -12,6 +12,7 @@ elif [ "$OS_NAME" = "Linux" ]; then
 fi
 
 # Initialize Completion Engine
+mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 autoload -Uz compinit
 compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
 
@@ -123,8 +124,8 @@ _dot_doctor() {
   local tools=(
     nvim tmux wezterm starship git
     rg fd bat fzf zoxide eza lazygit atuin direnv fnm
-    vtsls eslint_d prettierd prettier stylua shfmt taplo
-    ruff black yarn
+    node pnpm npm python3 uv
+    vtsls ruff ty stylua shfmt taplo tree-sitter
   )
   for cmd in "${tools[@]}"; do
     if command -v "$cmd" >/dev/null 2>&1; then
@@ -141,7 +142,12 @@ _dot_update() {
   fi
 
   if command -v nvim >/dev/null 2>&1; then
-    XDG_CONFIG_HOME="$DOTFILES_DIR" nvim --headless '+Lazy! sync' +qa
+    XDG_CONFIG_HOME="$DOTFILES_DIR" nvim --headless '+Lazy! sync' \
+      "+lua require('mason-registry').refresh(function() vim.cmd('qa') end)"
+  fi
+
+  if command -v corepack >/dev/null 2>&1; then
+    corepack install --global pnpm@latest
   fi
 }
 
@@ -160,3 +166,11 @@ dot() {
 
 alias dot-update='dot update'
 alias dot-doctor='dot doctor'
+
+# pnpm
+export PNPM_HOME="${PNPM_HOME:-$HOME/Library/pnpm}"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end

@@ -34,7 +34,7 @@ return {
     config = function()
         require("nvim-possession").setup({
             sessions = {
-                sessions_path = vim.fn.stdpath("config") .. "/sessions/",
+                sessions_path = vim.fn.stdpath("state") .. "/sessions/",
                 sessions_variable = "session",
                 sessions_icon = "",
                 sessions_prompt = "sessions:",

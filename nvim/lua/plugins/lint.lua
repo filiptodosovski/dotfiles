@@ -5,23 +5,9 @@ return {
     local lint = require("lint")
     local fn = vim.fn
 
-    local function pick_linter(...)
-      for i = 1, select("#", ...) do
-        local bin = select(i, ...)
-        if fn.executable(bin) == 1 then
-          return { bin }
-        end
-      end
-      return {}
-    end
-
     lint.linters_by_ft = {
-      javascript = pick_linter("eslint_d", "eslint"),
-      javascriptreact = pick_linter("eslint_d", "eslint"),
-      typescript = pick_linter("eslint_d", "eslint"),
-      typescriptreact = pick_linter("eslint_d", "eslint"),
-      json = pick_linter("eslint_d", "eslint"),
-      markdown = pick_linter("markdownlint"),
+      -- JS/TS diagnostics come from the project-aware ESLint LSP.
+      markdown = fn.executable("markdownlint") == 1 and { "markdownlint" } or {},
     }
 
     local lint_augroup = vim.api.nvim_create_augroup("NvimLint", { clear = true })
