@@ -2,26 +2,27 @@
 set -euo pipefail
 
 PROJECT_DIR="${PROJECT_DIR:-$HOME/Developer}"
-
 if [[ $# -eq 1 ]]; then
-	selected="$1"
+  selected="$1"
 else
-	selected="$(find "$PROJECT_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | fzf)"
+  selected="$(find "$PROJECT_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | fzf)" || exit 0
 fi
 
-if [[ -z "${selected:-}" ]]; then
-	exit 0
+[[ -n "${selected:-}" ]] || exit 0
+if [[ ! -d "$selected" ]]; then
+  printf 'Directory not found: %s\n' "$selected" >&2
+  exit 1
 fi
-
-selected_name="$(basename "$selected" | tr . _)"
-tmux_running="$(pgrep tmux || true)"
-
-if [[ -z "${TMUX:-}" ]] && [[ -z "$tmux_running" ]]; then
-	exec tmux new-session -s "$selected_name" -c "$selected"
-fi
+# Canonical paths keep aliases together and same-named projects separate.
+selected="$(cd "$selected" && pwd -P)"
+path_id="$(printf '%s' "$selected" | cksum)"
+selected_name="$(basename "$selected" | tr ' .:' '___')_${path_id%% *}"
 
 if ! tmux has-session -t="$selected_name" 2>/dev/null; then
-	tmux new-session -ds "$selected_name" -c "$selected"
+  tmux new-session -ds "$selected_name" -c "$selected"
 fi
-
-tmux switch-client -t "$selected_name"
+if [[ -n "${TMUX:-}" ]]; then
+  tmux switch-client -t="$selected_name"
+else
+  exec tmux attach-session -t="$selected_name"
+fi
