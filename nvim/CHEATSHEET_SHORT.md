@@ -2,6 +2,8 @@
 
 Leader is **Space**.
 
+See the [full cheat sheet](CHEATSHEET.md) for tmux, worktrees, setup and maintenance.
+
 | Task | Keys |
 | --- | --- |
 | Find files / search text | Ctrl-P / Space pp / Space pa |
