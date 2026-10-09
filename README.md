@@ -1,116 +1,69 @@
 # Dotfiles
 
-Reproducible macOS development environment centered on Neovim, TypeScript, and Python.
+My configs for macOS and Linux. Still a work in progress.
 
-The terminal presentation is intentionally kept in the existing WezTerm, Starship, tmux,
-and AeroSpace configuration files.
+## Ensure installed
 
-## Bootstrap
+- nvim
+- tmux
+- wezterm
+- zsh
+- aerospace
+- starship
+- fnm
+- uv
+- go
+- prettier
+- prettierd
 
-Install Apple's Command Line Tools and [Homebrew](https://brew.sh/) first. Clone the
-repository, then run the idempotent bootstrap script:
+## Install
 
-```bash
-xcode-select --install
+Install [Homebrew](https://brew.sh/) first.
+
+- **macOS:** install Command Line Tools with `xcode-select --install`.
+- **Linux:** install your distro's build tools. See [Homebrew's Linux setup](https://docs.brew.sh/Homebrew-on-Linux).
+  Install [WezTerm](https://wezterm.org/install/linux.html) separately, or use your existing terminal.
+
+```sh
 git clone https://github.com/filiptodosovski/dotfiles.git ~/.dotfiles
-~/.dotfiles/scripts/bootstrap.sh --packages
+cd ~/.dotfiles
+./scripts/bootstrap.sh --packages
 exec zsh -l
 ```
 
-Omit `--packages` to create only the symlinks and sync Neovim. Existing targets that do
-not already resolve to this repository are moved to `~/.dotfiles-backup/<timestamp>/`
-before replacement. The script links complete configuration directories, installs TPM
-and its plugins, links the tracked `tmux-sessionizer`, and waits for Neovim parsers and
-language servers to finish installing.
+This installs the packages and plugins and creates the symlinks.
+Existing configs are backed up in `~/.dotfiles-backup/`.
 
-Inspect or verify without changing the machine:
+Meslo is installed automatically. MonoLisa is optional.
+On macOS, allow AeroSpace access in System Settings → Privacy & Security → Accessibility.
 
-```bash
-~/.dotfiles/scripts/bootstrap.sh --dry-run
-~/.dotfiles/scripts/bootstrap.sh --check
+## Scripts
+
+- `bin/tmux-sessionizer` — pick a project from `~/Developer` and open its tmux session.
+  Session names include a path checksum. Linked to `~/.local/bin/tmux-sessionizer`.
+  Use Ctrl-F, then `f` in tmux.
+- `scripts/update.sh` — update packages, plugins and language tools. Run `dot update`.
+- `scripts/bootstrap.sh --check` — check the setup. Run `dot doctor`.
+
+## Worktrees
+
+From a project, run `wt agent/auth` to create a worktree and open its tmux session.
+Use `wt agent/auth main` to start from `main` instead of your current commit.
+For `chat-app`, the folder is `chat-app-agent-auth`, beside the original project.
+Run your agent CLI there. Install project dependencies if needed.
+
+Switch between projects and worktrees with Ctrl-F, then `f` in tmux.
+In the agent worktree, Space gd in Neovim reviews its uncommitted changes.
+From the original project, use `:CodeDiff --repo ../chat-app-agent-auth` to review them.
+After committing, use `:CodeDiff main...agent/auth` to review the branch.
+
+After reviewing and testing, return to the original project on `main`, with a clean
+working tree:
+
+```sh
+git merge agent/auth
+git worktree remove ../chat-app-agent-auth
+git branch -d agent/auth
 ```
 
-MonoLisa is licensed and is not stored in this repository. Install
-`MonoLisa-Regular.ttf` in `~/Library/Fonts` before starting WezTerm. The bootstrap check
-reports when it is missing; Meslo remains the icon and missing-glyph fallback.
-
-The `Brewfile` contains the reproducible core toolchain. Mason owns Neovim's editor
-language servers; Homebrew provides the general CLI tools (including Ruff and ty for
-shell workflows) and the Tree-sitter CLI. Package bootstrap grants trust only to the
-specific AeroSpace cask, not its entire third-party tap. It also installs the current
-Node LTS through fnm and makes it the default.
-
-## JavaScript and TypeScript
-
-Completion is enabled by `blink.cmp`, backed by the active TypeScript language server,
-buffer words, paths, and snippets. VTSLS is used for current projects. If a project has
-TypeScript 7 or newer, Neovim automatically selects the native TypeScript LSP instead;
-the two servers do not run together.
-
-Completion keys (unchanged):
-
-- Show completion/docs: `Ctrl-Space`
-- Next/previous item: `Ctrl-n` / `Ctrl-p`
-- Accept selected item: `Ctrl-y`
-- Accept/fallback: `Enter`
-
-VTSLS prefers the project's TypeScript version and keeps auto-imports, function-call
-completion, inlay hints, and move-to-file actions enabled. ESLint runs through its LSP,
-so monorepo and project-local configuration are respected.
-
-Formatting uses the first available formatter (`prettierd`, then `prettier`) and runs on
-save. Manual formatting remains `<leader>f`, `<F3>`, or `:Format`.
-
-`:HealthTS` / `<leader>ch` detects pnpm, Bun, Yarn, or npm from `packageManager` and
-lockfiles. It runs available non-mutating `format:check`, `lint`, `typecheck`, and `test`
-scripts.
-
-## Python
-
-The Python path is intentionally small and modern:
-
-- `uv` for Python versions, virtual environments, dependencies, and scripts
-- `ruff` for linting, fixes, import sorting, and formatting
-- `ty` for type checking and editor language intelligence
-
-Start a project with:
-
-```bash
-uv init
-uv add <package>
-uv run python main.py
-uv run ruff check .
-uv run ty check
-```
-
-Neovim attaches Ruff and ty automatically. Ruff owns diagnostics/fixes and formatting;
-ty owns types and hover information. Python defaults to four-space indentation unless a
-project's EditorConfig overrides it.
-
-## Maintenance
-
-```bash
-dot doctor  # show required tools and their resolved paths
-dot update  # Homebrew upgrade + Neovim plugin/parser/Mason registry sync
-```
-
-Starship profiles remain unchanged:
-
-```bash
-dot prompt-core
-dot prompt-languages
-```
-
-## Neovim behavior
-
-- Tree-sitter uses its Neovim 0.12 `main` API and installs the configured parsers.
-- Swap, persistent undo, and session recovery are enabled. Session state lives under
-  Neovim's state directory rather than inside this repository.
-- Undo state is private to the user. Swap and persistent undo are disabled for common
-  secret files such as `.env`, `.dev.vars`, private keys, and credentials; persistent
-  backups remain disabled globally.
-- Trailing whitespace is removed on save except in Markdown, diffs, and commit messages.
-- Formatting uses project tools where available and LSP fallback otherwise.
-- [Full key reference](nvim/CHEATSHEET.md) and [short reference](nvim/CHEATSHEET_SHORT.md)
-
-No keybindings were added or removed in this modernization pass.
+`wt` is linked to `~/.local/bin/wt` by the installer.
