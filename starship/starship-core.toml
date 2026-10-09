@@ -1,6 +1,6 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
-command_timeout = 1500
+command_timeout = 500
 scan_timeout = 30
 add_newline = true
 
@@ -35,18 +35,5 @@ style       = "yellow"
 format      = '([\[$all_status$ahead_behind\]]($style) )'
 ignore_submodules = true
 
-[git_commit]
-tag_symbol = " tag "
-
 [cmd_duration]
 min_time = 500
-
-# nodejs is slow when nvm is lazy-loaded; only enable it in the languages profile
-[nodejs]
-disabled = true
-
-[package]
-disabled = true
-
-[gcloud]
-disabled = true

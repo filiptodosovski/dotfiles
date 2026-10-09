@@ -1,11 +1,11 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
-command_timeout = 1500
+command_timeout = 500
 scan_timeout = 30
 add_newline = true
 
 format = """
-$directory$git_branch$git_status$nodejs$python$golang$rust$package$cmd_duration
+$directory$git_branch$git_status$nodejs$python$golang$package$cmd_duration
 $character
 """
 
@@ -35,9 +35,6 @@ style       = "yellow"
 format      = '([\[$all_status$ahead_behind\]]($style) )'
 ignore_submodules = true
 
-[git_commit]
-tag_symbol = " tag "
-
 [cmd_duration]
 min_time = 500
 
@@ -50,11 +47,5 @@ symbol = "py "
 [golang]
 symbol = "go "
 
-[rust]
-symbol = "rs "
-
 [package]
 symbol = "pkg "
-
-[gcloud]
-disabled = true

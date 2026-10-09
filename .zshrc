@@ -1,176 +1,86 @@
-export DOTFILES_DIR="$HOME/.dotfiles"
-export STARSHIP_CONFIG="${STARSHIP_CONFIG:-$HOME/.config/starship/starship-core.toml}"
-export PATH="$HOME/.local/bin:$HOME/.local/share/nvim/mason/bin:$PATH"
-
-OS_NAME="$(uname -s)"
-
-# 1. SETUP COMPLETIONS FPATH FIRST (Before compinit runs)
-if [ "$OS_NAME" = "Darwin" ]; then
-  [[ -d /opt/homebrew/share/zsh-completions ]] && fpath=(/opt/homebrew/share/zsh-completions $fpath)
-elif [ "$OS_NAME" = "Linux" ]; then
-  [[ -d /usr/share/zsh/site-functions ]] && fpath=(/usr/share/zsh/site-functions $fpath)
+# Resolve the symlink so the helpers also work from a different checkout path.
+export DOTFILES_DIR="${${(%):-%x}:A:h}"
+# Linux terminals often start a non-login shell, which skips .zprofile.
+[[ -n "${HOMEBREW_PREFIX:-}" ]] || source "$DOTFILES_DIR/.zprofile"
+export STARSHIP_CONFIG="${STARSHIP_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/starship/starship-core.toml}"
+if [[ "$OSTYPE" == darwin* ]]; then
+  export PNPM_HOME="${PNPM_HOME:-$HOME/Library/pnpm}"
+else
+  export PNPM_HOME="${PNPM_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/pnpm}"
 fi
+typeset -U path fpath
+# Editor-only Mason executables should not override shell/Homebrew tools.
+path=($HOME/.local/bin $PNPM_HOME ${path:#$HOME/.local/share/nvim/mason/bin})
+export PATH
 
-# Initialize Completion Engine
+# Completion directories must be registered before compinit.
+for directory in "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh/site-functions" "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-completions" /usr/share/zsh/site-functions; do
+  [[ -d "$directory" ]] && fpath=("$directory" $fpath)
+done
+unset directory
 mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 autoload -Uz compinit
 compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+zstyle ":completion:*" menu no
 
-# Allow bash-style completions
-autoload -Uz bashcompinit && bashcompinit
-
-# Register completions for common tools
-command -v aws_completer >/dev/null 2>&1 && complete -C aws_completer aws
-command -v terraform     >/dev/null 2>&1 && complete -o nospace -C "$(command -v terraform)" terraform
-command -v gh            >/dev/null 2>&1 && eval "$(gh completion -s zsh 2>/dev/null)"
-
-# Enable the menu picker fallback
-zstyle ':completion:*' menu select
-LISTMAX=0
-zstyle ':completion:*' list-prompt   ''
-zstyle ':completion:*' select-prompt ''
-
-# 2. LOAD FZF-TAB (Must be after compinit, before zsh-syntax-highlighting)
-for _fzf_tab_path in \
-  "$HOME/.local/share/fzf-tab/fzf-tab.plugin.zsh" \
-  /opt/homebrew/share/fzf-tab/fzf-tab.plugin.zsh \
-  /usr/share/fzf-tab/fzf-tab.plugin.zsh; do
-  if [[ -r "$_fzf_tab_path" ]]; then
-    source "$_fzf_tab_path"
-    break
-  fi
+# Node versions, fuzzy search and Tab completion.
+command -v fnm >/dev/null && eval "$(fnm env --use-on-cd --shell zsh)"
+command -v fzf >/dev/null && eval "$(fzf --zsh)"
+for plugin in "${HOMEBREW_PREFIX:-/opt/homebrew}/share/fzf-tab/fzf-tab.zsh" "$HOME/.local/share/fzf-tab/fzf-tab.plugin.zsh" /usr/share/fzf-tab/fzf-tab.plugin.zsh; do
+  if [[ -r "$plugin" ]]; then source "$plugin"; break; fi
 done
-unset _fzf_tab_path
+unset plugin
+zstyle ":fzf-tab:*" fzf-flags --height=50% --layout=reverse --border
+zstyle ":fzf-tab:*" switch-group "," "."
+(( $+widgets[fzf-tab-complete] )) && bindkey "^I" fzf-tab-complete
 
-(( $+functions[enable-fzf-tab] )) && enable-fzf-tab
-zstyle ':fzf-tab:*' fzf-flags --height=50% --layout=reverse --border --info=inline --cycle
-zstyle ':fzf-tab:*' switch-group ',' '.'
-
-# 3. CORE RUNTIMES & ENVIRONMENTS
-# fnm is executed early here so Node environments are instantly ready
-command -v fnm >/dev/null 2>&1 && eval "$(fnm env --use-on-cd)"
-setopt auto_cd interactive_comments
-
-[[ -r /opt/homebrew/opt/fzf/shell/completion.zsh ]] && source /opt/homebrew/opt/fzf/shell/completion.zsh
-[[ -r /opt/homebrew/opt/fzf/shell/key-bindings.zsh ]] && source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
-
-command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
-
-# History Setup
+# Shared history; a leading space keeps a command out of saved history.
 HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"
 mkdir -p "${HISTFILE:h}"
 HISTSIZE=50000
 SAVEHIST=50000
 setopt share_history extended_history hist_expire_dups_first hist_ignore_dups hist_ignore_space hist_reduce_blanks hist_verify
+setopt auto_cd interactive_comments
+bindkey "^[[A" history-search-backward
+bindkey "^[[B" history-search-forward
 
-# 4. KEY BINDINGS (Declared before loading syntax-highlighting plugins)
-bindkey '^[[A' history-search-backward
-bindkey '^[[B' history-search-forward
+# Short aliases for everyday tools.
+command -v eza >/dev/null && alias ls="eza --icons=always"
+command -v bat >/dev/null && alias ccat="bat --style=plain --paging=never"
+command -v fd >/dev/null && alias ff="fd"
+command -v rg >/dev/null && alias rgf="rg --smart-case"
+command -v rga >/dev/null && alias pdfgrep="rga"
+command -v lazygit >/dev/null && alias lg="lazygit"
+command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
+command -v atuin >/dev/null && eval "$(atuin init zsh --disable-up-arrow)"
+command -v starship >/dev/null && eval "$(starship init zsh)"
 
-if (( $+widgets[fzf-tab-complete] )); then
-  bindkey '^I' fzf-tab-complete
-fi
-
-# 5. HOOKS & PLUGINS (Disabling async overrides timing issues)
-unset ZSH_AUTOSUGGEST_USE_ASYNC
-
-if [ "$OS_NAME" = "Darwin" ]; then
-  [[ -r /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-  [[ -r /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-elif [ "$OS_NAME" = "Linux" ]; then
-  [[ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-  [[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-fi
-
-# 6. EXTERNAL TOOLS & CLI ALIASES
-command -v eza >/dev/null 2>&1 && alias ls="eza --icons=always"
-command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
-command -v bat >/dev/null 2>&1 && alias ccat="bat --style=plain --paging=never"
-command -v fd >/dev/null 2>&1 && alias ff="fd"
-command -v rg >/dev/null 2>&1 && alias rgf="rg --smart-case"
-command -v rga >/dev/null 2>&1 && alias pdfgrep="rga"
-command -v lazygit >/dev/null 2>&1 && alias lg="lazygit"
-
-command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
-command -v atuin >/dev/null 2>&1 && eval "$(atuin init zsh --disable-up-arrow)"
-
-# Lazy-load legacy NVM if needed (kept fallback safe)
-export NVM_DIR="$HOME/.nvm"
-if [ -s "$NVM_DIR/nvm.sh" ]; then
-  _nvm_load() {
-    unset -f nvm node npm npx
-    \. "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-  }
-  for _cmd in nvm node npm npx; do
-    eval "${_cmd}() { _nvm_load; ${_cmd} \"\$@\"; }"
-  done
-  unset _cmd
-fi
-
-# 7. CUSTOM CORE UTILITIES & SHORTCUTS
 prompt-core() {
-  export STARSHIP_CONFIG="$HOME/.config/starship/starship-core.toml"
+  export STARSHIP_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/starship/starship-core.toml"
   exec zsh -l
 }
-
 prompt-languages() {
-  export STARSHIP_CONFIG="$HOME/.config/starship/starship-languages.toml"
+  export STARSHIP_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/starship/starship-languages.toml"
   exec zsh -l
 }
-
-_dot_doctor() {
-  echo "OS: $(uname -s)"
-  local tools=(
-    nvim tmux wezterm starship git
-    rg fd bat fzf zoxide eza lazygit atuin direnv fnm
-    node pnpm npm python3 uv
-    vtsls ruff ty stylua shfmt taplo tree-sitter
-  )
-  for cmd in "${tools[@]}"; do
-    if command -v "$cmd" >/dev/null 2>&1; then
-      printf "%-12s OK (%s)\n" "$cmd" "$(command -v "$cmd")"
-    else
-      printf "%-12s MISSING\n" "$cmd"
-    fi
-  done
-}
-
-_dot_update() {
-  if command -v brew >/dev/null 2>&1; then
-    brew update && brew upgrade && brew cleanup
-  fi
-
-  if command -v nvim >/dev/null 2>&1; then
-    XDG_CONFIG_HOME="$DOTFILES_DIR" nvim --headless '+Lazy! sync' \
-      "+lua require('mason-registry').refresh(function() vim.cmd('qa') end)"
-  fi
-
-  if command -v corepack >/dev/null 2>&1; then
-    corepack install --global pnpm@latest
-  fi
-}
-
+# Maintenance lives in the scripts, rather than in shell startup.
 dot() {
   case "$1" in
-    update) _dot_update ;;
-    doctor) _dot_doctor ;;
+    doctor) "$DOTFILES_DIR/scripts/bootstrap.sh" --check ;;
+    update) "$DOTFILES_DIR/scripts/update.sh" "${@:2}" ;;
     prompt-core) prompt-core ;;
     prompt-languages) prompt-languages ;;
-    *)
-      echo "Usage: dot {update|doctor|prompt-core|prompt-languages}"
-      return 1
-      ;;
+    *) echo "Usage: dot {doctor|update|prompt-core|prompt-languages}"; return 1 ;;
   esac
 }
+alias dot-doctor="dot doctor"
+alias dot-update="dot update"
 
-alias dot-update='dot update'
-alias dot-doctor='dot doctor'
-
-# pnpm
-export PNPM_HOME="${PNPM_HOME:-$HOME/Library/pnpm}"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
+# Load highlighting last, after integrations have registered their widgets.
+for plugin in "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-autosuggestions/zsh-autosuggestions.zsh" /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh; do
+  if [[ -r "$plugin" ]]; then source "$plugin"; break; fi
+done
+for plugin in "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh; do
+  if [[ -r "$plugin" ]]; then source "$plugin"; break; fi
+done
+unset plugin
