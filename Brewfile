@@ -1,9 +1,6 @@
-tap "nikitabobko/tap"
-
 # Shell, navigation, and source control
 brew "atuin"
 brew "bat"
-brew "direnv"
 brew "eza"
 brew "fd"
 brew "fnm"
@@ -16,7 +13,6 @@ brew "lazygit"
 brew "pnpm"
 brew "ripgrep"
 brew "starship"
-brew "stow"
 brew "tmux"
 brew "zoxide"
 brew "zsh-autosuggestions"
@@ -24,16 +20,24 @@ brew "zsh-syntax-highlighting"
 
 # Editor and language tooling
 brew "neovim"
+brew "go"
+brew "prettier"
+brew "prettierd"
 brew "ruff"
-brew "shfmt"
 brew "stylua"
-brew "taplo"
 brew "tree-sitter-cli"
 brew "ty"
 brew "uv"
 
-# Keep the existing terminal/window-manager setup and appearance.
-cask "nikitabobko/tap/aerospace"
-cask "font-jetbrains-mono-nerd-font"
-cask "font-meslo-lg-nerd-font"
-cask "wezterm@nightly"
+if OS.mac?
+  tap "nikitabobko/tap"
+  cask "nikitabobko/tap/aerospace"
+  cask "font-meslo-lg-nerd-font"
+  cask "wezterm@nightly"
+else
+  brew "zsh"
+  brew "unzip"
+  brew "fontconfig"
+  brew "wl-clipboard" if ENV["WAYLAND_DISPLAY"]
+  brew "xclip" if ENV["DISPLAY"] && !ENV["WAYLAND_DISPLAY"]
+end
