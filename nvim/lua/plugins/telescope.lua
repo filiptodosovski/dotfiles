@@ -1,21 +1,12 @@
-local last_grep_search = nil
-
 return {
-  'nvim-telescope/telescope.nvim',
-  tag = '0.1.8',
+  "nvim-telescope/telescope.nvim",
+  version = "*", -- Track stable releases; the lockfile records the exact revision.
   cmd = "Telescope",
-  -- or                            , branch = '0.1.x',
-  dependencies = {
-    { 'nvim-lua/plenary.nvim' },
-    {
-      "isak102/telescope-git-file-history.nvim",
-      dependencies = { "tpope/vim-fugitive" }
-    }
-  },
+  dependencies = { "nvim-lua/plenary.nvim" },
   keys = {
-    { '<leader>pf', "<cmd>Telescope git_files<CR>" },
-    { '<leader>ff', "<cmd>Telescope find_files<CR>", desc = "Find Files" },
-    { '<C-p>', "<cmd>Telescope find_files<CR>" },
+    { "<leader>pf", "<cmd>Telescope git_files<CR>" },
+    { "<leader>pp", "<cmd>Telescope find_files<CR>", desc = "Find Files" },
+    { "<C-p>", "<cmd>Telescope find_files<CR>" },
     {
       "<leader>ps",
       function()
@@ -23,39 +14,18 @@ return {
         if not ok or search == nil or search == "" then
           return
         end
-        last_grep_search = search
-        require('telescope.builtin').grep_string({ search = search })
+        require("telescope.builtin").grep_string({ search = search })
       end,
-      desc = "Grep with custom prompt"
+      desc = "Grep with custom prompt",
     },
-    {
-      "<leader>pr",
-      function()
-        if not last_grep_search or last_grep_search == "" then
-          vim.notify("No previous grep search", vim.log.levels.WARN)
-          return
-        end
-        require('telescope.builtin').grep_string({ search = last_grep_search })
-      end,
-      desc = "Repeat last grep"
-    },
-    { "<leader>pa", "<cmd>Telescope live_grep<CR>" },
-    { "<leader>fg", "<cmd>Telescope live_grep<CR>", desc = "Live Grep" },
-    { "<leader>fb", "<cmd>Telescope buffers<CR>", desc = "Find Buffers" },
-    { "<leader>fr", "<cmd>Telescope oldfiles<CR>", desc = "Recent Files" },
-    { '<leader>vh', "<cmd>Telescope help_tags<CR>" },
-    { '<S-p>', "<cmd>Telescope commands<CR>" },
-    {
-      '<leader>gh',
-      function()
-        local telescope = require('telescope')
-        telescope.load_extension("git_file_history")
-        telescope.extensions.git_file_history.git_file_history()
-      end
-    },
+    { "<leader>pa", "<cmd>Telescope live_grep<CR>", desc = "Live Grep" },
+    { "<leader>pb", "<cmd>Telescope buffers<CR>", desc = "Find Buffers" },
+    { "<leader>pr", "<cmd>Telescope oldfiles<CR>", desc = "Recent Files" },
+    { "<leader>vh", "<cmd>Telescope help_tags<CR>" },
+    { "<S-p>", "<cmd>Telescope commands<CR>" },
   },
   config = function()
-    local telescope = require('telescope')
+    local telescope = require("telescope")
 
     telescope.setup({
       pickers = {
@@ -69,5 +39,5 @@ return {
         },
       },
     })
-  end
+  end,
 }

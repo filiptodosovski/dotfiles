@@ -13,8 +13,12 @@ vim.keymap.set("i", "<Left>", "<nop>")
 vim.keymap.set("i", "<Right>", "<nop>")
 
 -- clear search highlights
-vim.keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
-vim.keymap.set("n", "<Esc><Esc>", ":nohl<CR>", { desc = "Clear search highlights" })
+vim.keymap.set(
+  "n",
+  "<leader>h",
+  "<cmd>nohlsearch<CR>",
+  { silent = true, desc = "Clear search highlights" }
+)
 
 -- increment/decrement numbers
 vim.keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" }) -- increment
@@ -26,13 +30,8 @@ vim.keymap.set("n", "<leader>ra", function()
   print("Reloaded all buffers")
 end)
 
-vim.keymap.set("n", "<leader>rf", function()
-  vim.cmd("bufdo e!")
-  print("! Reloaded all buffers")
-end)
-
 -- Return to file explorer
-vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
+vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Built-in file explorer" })
 
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
@@ -65,13 +64,8 @@ vim.keymap.set("i", "<C-c>", "<Esc>")
 
 vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "<leader>f", function()
-  local ok, conform = pcall(require, "conform")
-  if ok then
-    conform.format({ lsp_format = "fallback" })
-  else
-    vim.lsp.buf.format()
-  end
-end, { desc = "Format buffer" })
+  require("conform").format({ async = true })
+end, { desc = "Format buffer", nowait = true })
 
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")
@@ -83,15 +77,6 @@ vim.keymap.set("n", "[d", function()
 end, { desc = "Prev Diagnostic" })
 vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename Symbol" })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
-vim.keymap.set("n", "<leader>ld", vim.lsp.buf.definition, { desc = "LSP Definition" })
-vim.keymap.set("n", "<leader>li", vim.lsp.buf.implementation, { desc = "LSP Implementation" })
-vim.keymap.set(
-  "n",
-  "<leader>lr",
-  "<cmd>Trouble lsp_references toggle<cr>",
-  { desc = "LSP References (Trouble)" }
-)
-
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 vim.keymap.set(
   "n",
@@ -99,86 +84,11 @@ vim.keymap.set(
   "<cmd>!chmod +x %<CR>",
   { silent = true, desc = "Chmod +x current file" }
 )
-vim.keymap.set(
-  "n",
-  "<leader>ch",
-  "<cmd>HealthTS<CR>",
-  { desc = "TS Health (check/lint/types/tests)" }
-)
-
 vim.api.nvim_create_user_command("Format", function()
-  local ok, conform = pcall(require, "conform")
-  if ok then
-    conform.format({ lsp_format = "fallback" })
-  else
-    vim.lsp.buf.format()
-  end
+  require("conform").format({ async = true })
 end, {})
 
-vim.api.nvim_create_user_command("HealthTS", function()
-  local root = vim.fs.root(0, { "package.json", ".git" }) or vim.fn.getcwd()
-  local package_json = root .. "/package.json"
-
-  if vim.fn.filereadable(package_json) == 0 then
-    vim.notify("HealthTS: package.json not found in project root", vim.log.levels.WARN)
-    return
-  end
-
-  local package_lines = vim.fn.readfile(package_json)
-  local ok, package_data = pcall(vim.json.decode, table.concat(package_lines, "\n"))
-  if not ok or type(package_data) ~= "table" then
-    vim.notify("HealthTS: could not parse package.json", vim.log.levels.ERROR)
-    return
-  end
-
-  local scripts = type(package_data.scripts) == "table" and package_data.scripts or {}
-  local wanted = { "format:check", "lint", "typecheck", "test" }
-  local commands = {}
-
-  local package_manager = type(package_data.packageManager) == "string"
-      and package_data.packageManager:match("^([^@]+)")
-    or nil
-
-  if not package_manager then
-    local lockfiles = {
-      { "pnpm-lock.yaml", "pnpm" },
-      { "bun.lock", "bun" },
-      { "bun.lockb", "bun" },
-      { "yarn.lock", "yarn" },
-      { "package-lock.json", "npm" },
-    }
-    for _, lockfile in ipairs(lockfiles) do
-      if vim.fn.filereadable(root .. "/" .. lockfile[1]) == 1 then
-        package_manager = lockfile[2]
-        break
-      end
-    end
-  end
-
-  package_manager = package_manager or "npm"
-  if not vim.tbl_contains({ "pnpm", "bun", "yarn", "npm" }, package_manager) then
-    vim.notify("HealthTS: unsupported package manager " .. package_manager, vim.log.levels.ERROR)
-    return
-  end
-  if vim.fn.executable(package_manager) == 0 then
-    vim.notify("HealthTS: " .. package_manager .. " is not installed", vim.log.levels.ERROR)
-    return
-  end
-
-  for _, script in ipairs(wanted) do
-    if scripts[script] ~= nil then
-      table.insert(commands, package_manager .. " run --silent " .. script)
-    end
-  end
-
-  if #commands == 0 then
-    vim.notify("HealthTS: no format:check/lint/typecheck/test scripts found", vim.log.levels.WARN)
-    return
-  end
-
-  vim.cmd("botright 12split")
-  vim.cmd("terminal cd " .. vim.fn.shellescape(root) .. " && " .. table.concat(commands, " && "))
-end, { desc = "Run non-mutating JS/TS project health checks" })
+vim.keymap.set("n", "<C-Y>", "<cmd>Neotree toggle <cr>", { desc = "Toggle file tree" })
 
 vim.keymap.set(
   "n",

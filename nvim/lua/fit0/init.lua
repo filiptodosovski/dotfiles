@@ -1,41 +1,16 @@
 require("fit0.set")
 require("fit0.remap")
 
-local augroup = vim.api.nvim_create_augroup
-local FitoGroup = augroup("fit0", {})
-
 local autocmd = vim.api.nvim_create_autocmd
-local yank_group = augroup("HighlightYank", {})
-
-function R(name)
-  require("plenary.reload").reload_module(name)
-end
+local yank_group = vim.api.nvim_create_augroup("HighlightYank", { clear = true })
 
 autocmd("TextYankPost", {
   group = yank_group,
   pattern = "*",
   callback = function()
-    vim.highlight.on_yank({
+    vim.hl.on_yank({
       higroup = "IncSearch",
       timeout = 40,
     })
   end,
 })
-
-autocmd({ "BufWritePre" }, {
-  group = FitoGroup,
-  pattern = "*",
-  callback = function(args)
-    if vim.tbl_contains({ "markdown", "diff", "gitcommit" }, vim.bo[args.buf].filetype) then
-      return
-    end
-
-    local view = vim.fn.winsaveview()
-    vim.cmd([[keeppatterns %s/\s\+$//e]])
-    vim.fn.winrestview(view)
-  end,
-})
-
-vim.g.netrw_browse_split = 0
-vim.g.netrw_banner = 0
-vim.g.netrw_winsize = 25

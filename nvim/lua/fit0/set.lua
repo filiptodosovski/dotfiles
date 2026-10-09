@@ -1,5 +1,7 @@
 vim.opt.guicursor = ""
 
+vim.g.netrw_banner = 0 -- Hide the directory listing's help/header block.
+
 vim.opt.nu = true
 vim.opt.relativenumber = true
 
@@ -59,6 +61,7 @@ vim.opt.signcolumn = "yes"
 vim.opt.isfname:append("@-@")
 
 vim.opt.updatetime = 50
+vim.opt.timeoutlen = 300 -- Time allowed to complete multi-key shortcuts.
 
 vim.opt.colorcolumn = "80"
 vim.opt.showmode = false
@@ -67,6 +70,7 @@ vim.opt.showmode = false
 vim.g.loaded_node_provider = 0
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
+vim.g.loaded_python3_provider = 0 -- Python editing uses ty/Ruff, not a pynvim host.
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "python",

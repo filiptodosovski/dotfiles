@@ -6,6 +6,6 @@ return {
 
     keywords = {
       TODO = { icon = " ", color = "warning" },
-    }
-  }
+    },
+  },
 }
