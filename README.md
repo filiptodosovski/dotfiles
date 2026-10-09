@@ -37,5 +37,3 @@ Creates symlinks and backs up existing configs in `~/.dotfiles-backup/`.
 - `wt <branch> [base]` — create a worktree and open its tmux session.
 - `dot doctor` — check the setup.
 - `dot update` — update packages and plugins.
-
-[Cheat sheet](nvim/CHEATSHEET.md)

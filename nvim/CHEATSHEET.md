@@ -1,6 +1,7 @@
-# Neovim cheat sheet
+# Dotfiles cheat sheet
 
-Leader is **Space**. This sheet describes the cleaned configuration, based on
+Neovim leader is **Space**. tmux prefix is **Ctrl-F**.
+This sheet describes the cleaned configuration, based on
 February 24 (`bac9d5d`) custom mappings with modern completion and LSP interfaces.
 
 ## Search and navigation
@@ -108,18 +109,118 @@ Inside CodeDiff:
 
 Changes refresh automatically. Use :CodeDiff history for repository history.
 
-For agent worktrees, run wt agent/auth in a project terminal. In that worktree,
-Space gd reviews uncommitted changes. From the original project, use
-:CodeDiff --repo ../chat-app-agent-auth. After committing, use
-:CodeDiff main...agent/auth to review the branch before merging.
-
 Gitsigns shows changed-line markers and inline blame. LazyGit handles commits,
 branches, staging, pulling and pushing. Select a conflicted file in CodeDiff to
 resolve it: Space co accepts ours, Space ct theirs, Space cb both, and ]x/[x moves
 between conflicts.
 
+## tmux
+
+Press Ctrl-F, release it, then press the next key.
+
+| Keys after Ctrl-F | Action |
+| --- | --- |
+| f | Pick a project from ~/Developer and open its session |
+| s | Choose a running session |
+| ( / ) | Previous / next session |
+| d | Detach; leave programs running |
+| c | New window |
+| , | Rename window |
+| 1–9 | Select window |
+| \| / - | Split horizontally / vertically |
+| H / J / K / L | Select pane left / down / up / right |
+| h / j / k / l | Resize pane |
+| m | Toggle pane zoom |
+| o | Open dotfiles session |
+| g | Open LazyGit in a new window |
+| r | Reload tmux configuration |
+
+To kill another session: Ctrl-F, then s; select the **session row**, press x,
+then y to confirm. This stops its programs but leaves the worktree folder and branch.
+To kill the current session from its terminal, run `tmux kill-session`.
+
+Session names include a path checksum so same-named folders stay separate.
+Set PROJECT_DIR to change the picker directory. Both helpers are linked in ~/.local/bin.
+
+## Agent worktrees
+
+From a project terminal:
+
+```sh
+wt agent/auth       # Start from your current commit
+wt agent/auth main  # Alternatively, start from local main
+```
+
+Choose one command. wt creates a new branch and a sibling folder, then opens its
+tmux session. For chat-app, the folder is chat-app-agent-auth. Reopen it through
+Ctrl-F, then f. Run your agent CLI there and install project dependencies if needed.
+Uncommitted edits and ignored files, including dependencies and .env files, aren't copied.
+
+In the agent worktree, Space gd reviews uncommitted changes. From Neovim in the
+original project:
+
+```vim
+:CodeDiff --repo ../chat-app-agent-auth
+```
+
+After committing the agent's work, review its branch:
+
+```vim
+:CodeDiff main...agent/auth
+```
+
+After reviewing and testing, return to the original project on main with a clean
+working tree:
+
+```sh
+git merge agent/auth
+git worktree remove ../chat-app-agent-auth
+git branch -d agent/auth
+```
+
+Use your actual folder and branch names. `git worktree list` lists the worktrees.
+
+## Shell
+
+- fnm selects Node versions; uv manages Python projects.
+- Atuin searches command history; zoxide jumps between directories with z.
+- fzf-tab provides fuzzy Tab completion; lg opens LazyGit.
+- prompt-core / prompt-languages switch Starship profiles.
+
+For a Node project, keep one .node-version or .nvmrc in the project root.
+fnm switches automatically when entering the project. Once the selected Node
+version is right for that project, record it with `node --version > .node-version`
+and commit the file. Use `fnm install` if its recorded version isn't installed.
+
+## Setup on another computer
+
+Follow the installation commands in [README](../README.md).
+
+- Install Homebrew first.
+- macOS: install Command Line Tools with `xcode-select --install`.
+- Linux: install your distro's build tools; see [Homebrew's Linux setup](https://docs.brew.sh/Homebrew-on-Linux).
+  Install [WezTerm](https://wezterm.org/install/linux.html) separately or use your existing terminal.
+- Meslo is installed by bootstrap with --packages; MonoLisa is optional.
+- macOS: allow AeroSpace in System Settings → Privacy & Security → Accessibility.
+
+The installer links zsh, tmux, Neovim, WezTerm, Starship and the bin helpers.
+AeroSpace is linked on macOS only. Existing configs are backed up in ~/.dotfiles-backup/.
+
+| Command from the dotfiles folder | Action |
+| --- | --- |
+| ./scripts/bootstrap.sh --packages | Install packages, link configs and install plugins/servers/parsers |
+| ./scripts/bootstrap.sh --links-only | Create links without installing tools |
+| ./scripts/bootstrap.sh --dry-run | Preview the setup |
+| exec zsh -l | Reload the shell |
+
 ## Maintenance
 
+- dot doctor checks symlinks, tools, plugins, parsers and language servers.
+- dot update --dry-run previews updates.
+- dot update updates Brewfile packages, Node LTS/default, Neovim tools and unpinned tmux plugins.
+  It also refreshes WezTerm nightly on macOS; Linux terminals are managed separately.
+- Updates back up the Neovim lockfile in ~/.dotfiles-backup/.
+- The tmux theme stays pinned to v1.9.0; Blink tracks v1 releases.
 - :Lazy opens the plugin manager; :Lazy restore uses the lockfile's revisions.
 - :Lazy clean removes installed plugins no longer configured.
 - :Mason opens the language-server installer.
