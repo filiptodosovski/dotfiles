@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -eq 0 || "${1:-}" == -h || "${1:-}" == --help ]]; then
+  echo 'Usage: wt <new-branch> [base]'
+  echo 'Example: wt agent/auth main'
+  echo 'Creates a sibling worktree and opens its tmux session. Base defaults to HEAD.'
+  exit 0
+fi
+if [[ $# -gt 2 ]]; then
+  echo 'Usage: wt <new-branch> [base]' >&2
+  exit 2
+fi
+for tool in tmux-sessionizer tmux; do
+  command -v "$tool" >/dev/null || { echo "Missing tool: $tool" >&2; exit 1; }
+done
+
+root="$(git rev-parse --show-toplevel)"
+branch="$1"
+git check-ref-format "refs/heads/$branch"
+# Keep worktrees beside the project so the sessionizer can find them.
+target="${root}-${branch//\//-}"
+if [[ -e "$target" || -L "$target" ]]; then
+  printf 'Folder already exists: %s\nUse the tmux sessionizer to reopen it.\n' "$target" >&2
+  exit 1
+fi
+git -C "$root" worktree add -b "$branch" -- "$target" "${2:-HEAD}"
+printf 'Worktree: %s\nUncommitted edits and ignored files are not copied.\n' "$target"
+exec tmux-sessionizer "$target"
