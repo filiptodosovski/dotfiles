@@ -1,22 +1,9 @@
 return {
   "saghen/blink.cmp",
   event = "InsertEnter",
-  version = "*", -- use latest tagged release; ships precompiled fuzzy matcher
+  version = "1.*", -- stable v1 releases; v2 needs a deliberate migration
   dependencies = {
     "rafamadriz/friendly-snippets",
-    {
-      "L3MON4D3/LuaSnip",
-      version = "v2.*",
-      build = (vim.fn.has("win32") == 0 and vim.fn.executable("make") == 1)
-          and "make install_jsregexp"
-        or nil,
-      config = function()
-        require("luasnip.loaders.from_vscode").lazy_load()
-        require("luasnip.loaders.from_vscode").lazy_load({
-          paths = vim.fn.stdpath("config") .. "/snippets",
-        })
-      end,
-    },
   },
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
@@ -24,13 +11,13 @@ return {
     keymap = {
       preset = "default",
       ["<C-y>"] = { "select_and_accept" },
-      ["<CR>"] = { "accept", "fallback" },
-      ["<C-Space>"] = { "show", "show_documentation", "hide_documentation" },
+      ["<CR>"] = { "select_and_accept", "fallback" },
+      ["<C-Space>"] = { "show" },
       ["<C-n>"] = { "select_next", "fallback" },
       ["<C-p>"] = { "select_prev", "fallback" },
     },
 
-    snippets = { preset = "luasnip" },
+    snippets = { preset = "default" }, -- Neovim's built-in snippet engine.
 
     appearance = {
       nerd_font_variant = "mono",

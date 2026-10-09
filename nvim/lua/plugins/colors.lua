@@ -5,12 +5,11 @@ return {
     require("rose-pine").setup({
       variant = "main",
       dark_variant = "main",
-      disable_background = true,
+      highlight_groups = {
+        Normal = { bg = "NONE" },
+        NormalFloat = { bg = "NONE" },
+      },
     })
     vim.cmd("colorscheme rose-pine")
-
-    -- Keep Neovim transparent so the WezTerm background remains visible.
-    vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
   end,
 }
