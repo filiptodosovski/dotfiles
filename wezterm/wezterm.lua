@@ -14,16 +14,49 @@ config.font = wezterm.font_with_fallback({
   { family = "MonoLisa", weight = "Regular" },
   { family = "MesloLGS Nerd Font Mono", weight = "Regular" },
 })
-config.font_size = 20
+config.font_size = 16
 
 config.enable_tab_bar = false
 config.window_decorations = "RESIZE"
-config.window_background_opacity = 0.9
+config.window_background_opacity = 0.92
 if is_macos then
-  config.macos_window_background_blur = 40
+  config.macos_window_background_blur = 0
 end
 
-config.color_scheme = "rose-pine"
+-- proxySoul Undertow, adapted from proxysoul/dotfiles/kitty/proxysoul-undertow.conf.
+config.color_schemes = {
+  ["proxySoul Undertow"] = {
+    foreground = "#e8ebee",
+    background = "#0c0e11",
+    cursor_bg = "#98b0c2",
+    cursor_fg = "#0c0e11",
+    cursor_border = "#98b0c2",
+    selection_fg = "#0c0e11",
+    selection_bg = "#98b0c2",
+    split = "#2a323c",
+    ansi = {
+      "#272d35",
+      "#d68f8f",
+      "#93b3a2",
+      "#cfb595",
+      "#98b0c2",
+      "#c49aa4",
+      "#8fadc4",
+      "#a4acb6",
+    },
+    brights = {
+      "#3e454f",
+      "#e0a3a3",
+      "#a5c2b2",
+      "#d9c3a6",
+      "#c6cfd8",
+      "#d4aeb7",
+      "#a5bdd0",
+      "#e8ebee",
+    },
+  },
+}
+config.color_scheme = "proxySoul Undertow"
 
 config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 1200 }
 

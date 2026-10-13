@@ -1,3 +1,14 @@
 .nvimlog
-nvim.log
-tmux-*.log
+*.log
+*.swp
+*.swo
+*~
+.DS_Store
+.codex-secret-test/
+
+# Local environment values and account credentials.
+.env
+.env.*
+!.env.example
+auth.json
+mcp-auth.json
