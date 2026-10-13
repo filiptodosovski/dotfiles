@@ -60,7 +60,7 @@ vim.keymap.set({ "n", "v" }, "<leader>P", [["+p]])
 
 vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 
-vim.keymap.set("i", "<C-c>", "<Esc>")
+vim.keymap.set({ "i", "x" }, "<C-c>", "<Esc>", { desc = "Return to Normal mode" })
 
 vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "<leader>f", function()
@@ -106,9 +106,20 @@ end, { noremap = true, silent = true, desc = "Show diagnostics at cursor" })
 vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
 vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
 vim.keymap.set("n", "<leader>bdd", "<cmd>:bd<cr>", { desc = "Delete Buffer" })
-vim.keymap.set(
-  "n",
-  "<leader>bda",
-  "<cmd>:%bd|e#|bd#<cr>",
-  { desc = "Delete All Buffers But This One" }
-)
+vim.keymap.set("n", "<leader>bda", function()
+  local current = vim.api.nvim_get_current_buf()
+  if vim.bo[current].buftype ~= "" then
+    vim.notify("Select a file buffer first", vim.log.levels.INFO)
+    return
+  end
+
+  -- Keep the current buffer intact; reopening the alternate can revive diff panels.
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if buf ~= current and vim.bo[buf].buflisted and vim.bo[buf].buftype == "" then
+      local ok, err = pcall(vim.api.nvim_buf_delete, buf, { force = false })
+      if not ok then
+        vim.notify("Buffer kept: " .. tostring(err), vim.log.levels.WARN)
+      end
+    end
+  end
+end, { desc = "Delete All Buffers But This One" })

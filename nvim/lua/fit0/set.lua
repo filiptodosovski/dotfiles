@@ -63,7 +63,7 @@ vim.opt.isfname:append("@-@")
 vim.opt.updatetime = 50
 vim.opt.timeoutlen = 300 -- Time allowed to complete multi-key shortcuts.
 
-vim.opt.colorcolumn = "80"
+vim.opt.colorcolumn = ""
 vim.opt.showmode = false
 
 -- Avoid starting unused legacy providers on every Neovim launch.
