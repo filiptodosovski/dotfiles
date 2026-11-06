@@ -97,6 +97,11 @@ vim.keymap.set(
   { desc = "Reveal the active file in the tree" }
 )
 
+vim.keymap.set("n", "<leader>e", function()
+  local enabled = vim.diagnostic.config().virtual_lines
+  vim.diagnostic.config({ virtual_lines = not enabled and { current_line = true } or false })
+end, { desc = "Toggle diagnostic messages below current line" })
+
 -- open float window for errors
 vim.keymap.set("n", "<leader>q", function()
   vim.diagnostic.open_float(nil, { scope = "cursor", focusable = true })
@@ -123,3 +128,9 @@ vim.keymap.set("n", "<leader>bda", function()
     end
   end
 end, { desc = "Delete All Buffers But This One" })
+
+-- Neovim 0.12 ships an undo-tree viewer; load it on first use.
+vim.keymap.set("n", "<leader>u", function()
+  vim.cmd.packadd("nvim.undotree")
+  require("undotree").open()
+end, { desc = "Toggle undo tree" })

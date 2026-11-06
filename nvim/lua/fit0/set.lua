@@ -1,6 +1,8 @@
 vim.opt.guicursor = ""
 
 vim.g.netrw_banner = 0 -- Hide the directory listing's help/header block.
+vim.g.netrw_fastbrowse = 2 -- Retain local directory buffers; Ctrl-L refreshes the listing.
+vim.g.netrw_bufsettings = "noma nomod nonu bl nowrap ro nornu" -- Include directories in buffer switching.
 
 vim.opt.nu = true
 vim.opt.relativenumber = true

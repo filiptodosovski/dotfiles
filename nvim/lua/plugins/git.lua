@@ -3,6 +3,15 @@ return {
     "esmuellert/codediff.nvim",
     version = "*",
     cmd = "CodeDiff",
+    opts = {
+      highlights = {
+        -- Dark backgrounds keep syntax readable; changed words get a stronger tint.
+        line_insert = "#142820",
+        line_delete = "#301c27",
+        char_insert = "#1f3d30",
+        char_delete = "#492737",
+      },
+    },
     keys = {
       { "<leader>gd", "<cmd>CodeDiff<CR>", desc = "Review Git changes" },
       { "<leader>gD", "<cmd>CodeDiff file HEAD<CR>", desc = "Diff current file" },

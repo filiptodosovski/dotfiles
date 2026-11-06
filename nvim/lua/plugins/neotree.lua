@@ -8,6 +8,9 @@ return {
   },
   cmd = "Neotree",
   lazy = true,
+  opts = {
+    filesystem = { hijack_netrw_behavior = "disabled" },
+  },
   keys = {
     { "<C-b>", "<cmd>Neotree reveal right<cr>" },
   },

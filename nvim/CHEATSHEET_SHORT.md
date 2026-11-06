@@ -11,6 +11,7 @@ See the [full cheat sheet](CHEATSHEET.md) for tmux, worktrees, setup and mainten
 | Clear search highlights | Space h |
 | File tree | Ctrl-B / Ctrl-Y / Space rv |
 | Built-in file browser | Space pv |
+| Refresh directory listing | Ctrl-L (inside netrw) |
 | Previous / next buffer | Shift-H / Shift-L |
 | Close buffer / close other buffers | Space bdd / Space bda |
 | Format buffer / selection | Space f or :Format / visual F3 with LSP attached |
@@ -19,6 +20,7 @@ See the [full cheat sheet](CHEATSHEET.md) for tmux, worktrees, setup and mainten
 | LSP references / TypeScript version | Space vrr / Space cV |
 | References / diagnostics panel | gr / Space xx |
 | Next / previous diagnostic | ]d / [d |
+| Toggle diagnostic messages below current line | Space e |
 | Diagnostic popup | Space q |
 | Completion menu / next / previous | Ctrl-Space / Ctrl-n / Ctrl-p |
 | Accept completion | Ctrl-y / Enter |

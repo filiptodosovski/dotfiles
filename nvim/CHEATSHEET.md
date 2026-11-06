@@ -20,9 +20,13 @@ February 24 (`bac9d5d`) custom mappings with modern completion and LSP interface
 | Ctrl-Y (Normal mode) | Toggle Neo-tree |
 | Space rv | Reveal active file in Neo-tree |
 | Space pv | Open built-in file browser (netrw) |
+| Ctrl-L (netrw) | Refresh the cached directory listing |
 | Shift-H, Shift-L | Previous / next buffer |
 | Space bdd | Close buffer |
 | Space bda | Close other buffers |
+
+Directory browsers remain in the buffer bar for Shift-H/Shift-L until closed
+with Space bdd. Neo-tree does not take over these directory buffers.
 
 Arrow keys remain disabled in Normal and Insert modes, as in your earlier setup.
 Use h/j/k/l in Normal mode. Ctrl-D/Ctrl-U scroll while keeping the cursor centered.
@@ -42,6 +46,7 @@ Use h/j/k/l in Normal mode. Ctrl-D/Ctrl-U scroll while keeping the cursor center
 | Space vrr | List references through LSP |
 | Space cV | Select TypeScript version (vtsls buffers) |
 | gr | References in Trouble |
+| Space e | Toggle diagnostic messages below the current line |
 | Space q | Diagnostic popup |
 | ]d, [d | Next / previous diagnostic |
 | Space xx | Toggle all diagnostics in Trouble |

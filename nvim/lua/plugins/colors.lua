@@ -7,7 +7,9 @@ return {
       dark_variant = "main",
       highlight_groups = {
         Normal = { bg = "NONE" },
+        NormalNC = { bg = "NONE" },
         NormalFloat = { bg = "NONE" },
+        TelescopeBorder = { bg = "NONE" },
       },
     })
     vim.cmd("colorscheme rose-pine")
