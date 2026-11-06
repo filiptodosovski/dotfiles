@@ -37,5 +37,5 @@ jobs:
           bash -n scripts/bootstrap.sh scripts/update.sh bin/wt bin/tmux-sessionizer
           ./scripts/bootstrap.sh --help >/dev/null
           zsh -n .zshrc .zprofile 2>/dev/null || [ "$RUNNER_OS" = Linux ]
-          sh -n tmux/status.sh ai/claude/notify.sh ai/skills/impeccable/scripts/impeccable
+          sh -n tmux/status.sh ai/claude/notify.sh git/strip-ai-attribution ai/skills/impeccable/scripts/impeccable
           git diff --check

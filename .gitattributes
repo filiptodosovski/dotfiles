@@ -10,6 +10,7 @@
 *.yml text eol=lf
 *.md text eol=lf
 bin/* text eol=lf
+git/* text eol=lf
 .zshrc text eol=lf
 .zprofile text eol=lf
 ai/skills/impeccable/scripts/impeccable text eol=lf

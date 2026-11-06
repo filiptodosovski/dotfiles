@@ -1,0 +1,36 @@
+#!/bin/sh
+# Remove AI-tool attribution from commit messages, whichever agent wrote them:
+# "Co-authored-by: Claude/Cursor/Codex/Copilot/..." trailers and
+# "Generated with/by <tool>" lines. Human co-authors are kept.
+#   strip-ai-attribution <file>   commit-msg hook: edit the message file in place
+#   strip-ai-attribution          filter stdin to stdout (git filter-branch --msg-filter)
+tools='claude|claude code|anthropic|codex|chatgpt|openai|cursor|cursor agent|cursoragent|copilot|github copilot|gemini|aider|devin|windsurf|codeium|cline|jules|amp|pi'
+domains='anthropic\.com|openai\.com|cursor\.com|cursor\.sh|devin\.ai|codeium\.com|windsurf\.com'
+
+strip() {
+  LC_ALL=C awk -v tools="$tools" -v domains="$domains" '
+    {
+      line = tolower($0)
+      if (line ~ "^co-authored-by:[ \t]*(" tools ")([ \t<]|$)") next
+      if (line ~ "^co-authored-by:.*@(" domains ")>") next
+      if (line ~ "^[^a-z]*(generated|created|made) (with|by) \\[?(" tools ")([] \t(.]|$)") next
+      kept[++count] = $0
+    }
+    END {
+      while (count > 0 && kept[count] ~ /^[ \t]*$/) count--
+      for (i = 1; i <= count; i++) print kept[i]
+    }'
+}
+
+if [ $# -eq 0 ]; then
+  strip
+  exit 0
+fi
+message="$1"
+[ -f "$message" ] || exit 0
+temporary="$message.strip-ai.$$"
+if strip < "$message" > "$temporary"; then
+  cat "$temporary" > "$message"
+fi
+rm -f "$temporary"
+exit 0

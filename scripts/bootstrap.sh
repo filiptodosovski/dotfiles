@@ -76,6 +76,31 @@ fi
 
 same_file() { [[ -e "$2" && "$1" -ef "$2" ]]; }
 
+# Global commit-msg hook that strips AI attribution (Claude, Cursor, Codex, ...)
+# from every commit. Config-based hooks (Git 2.54+) run alongside repo hooks.
+GIT_HOOK_NAME=strip-ai-attribution
+git_hook_installed() {
+  git hook list commit-msg 2>/dev/null | grep -qx "$GIT_HOOK_NAME"
+}
+install_git_hook() {
+  local command="$DOTFILES_DIR/git/strip-ai-attribution"
+  if [[ "$(git config --global "hook.$GIT_HOOK_NAME.command" 2>/dev/null)" == "$command" ]] && git_hook_installed; then
+    printf 'already set     git hook %s\n' "$GIT_HOOK_NAME"
+    return
+  fi
+  if $DRY_RUN; then
+    printf 'would set      git hook %s (global commit-msg)\n' "$GIT_HOOK_NAME"
+    return
+  fi
+  git config --global "hook.$GIT_HOOK_NAME.command" "$command"
+  git config --global --replace-all "hook.$GIT_HOOK_NAME.event" commit-msg
+  if git_hook_installed; then
+    printf 'configured     git hook %s\n' "$GIT_HOOK_NAME"
+  else
+    printf 'git hook %s needs Git 2.54+ (found %s)\n' "$GIT_HOOK_NAME" "$(git --version)" >&2
+  fi
+}
+
 link_dotfile() {
   local source="$1" target="$2" relative_target
   if same_file "$source" "$target"; then
@@ -201,6 +226,12 @@ check_setup() {
     fi
   done
   check_tools || failed=1
+  if git_hook_installed; then
+    printf '%-18s %s\n' 'git hook OK' "$GIT_HOOK_NAME"
+  else
+    printf '%-18s %s\n' 'git hook MISSING' "$GIT_HOOK_NAME"
+    failed=1
+  fi
   while read -r plugin; do
     plugin="${plugin%%#*}"
     name="${plugin##*/}"
@@ -258,6 +289,7 @@ for spec in "${link_specs[@]}"; do
   IFS='|' read -r source target <<< "$spec"
   link_dotfile "$source" "$target"
 done
+install_git_hook
 if $DRY_RUN; then
   if ! $LINKS_ONLY; then
     echo 'would install  TPM and configured tmux plugins'

@@ -80,6 +80,16 @@ downloads its engine into `ai/skills/impeccable/scripts/bin/` (git-ignored).
   normal access. If another command fails with a sandbox error, add it to
   `sandbox.excludedCommands` in `ai/claude/settings.json` and run `dot ai --apply`.
 
+## No AI attribution
+
+Commits and PRs never name the AI that helped. Claude's own trailer and PR line
+are off (`attribution` in `ai/claude/settings.json`). For every other tool,
+`bootstrap.sh` installs a global Git `commit-msg` hook (`git/strip-ai-attribution`,
+Git 2.54+) that removes `Co-authored-by:` lines for Claude, Cursor, Codex,
+Copilot, Gemini, Aider and similar agents, and "Generated with <tool>" lines.
+Human co-authors are kept. It runs alongside each repository's own hooks.
+`git commit --no-verify` skips it, and it can't edit PR descriptions other tools write.
+
 ## Not saved here
 
 Logins, API keys, sessions, history, project trust, and Herdr's own config.

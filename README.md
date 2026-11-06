@@ -38,7 +38,9 @@ dot doctor
 
 This installs the Brewfile tools, current Node LTS, tmux plugins, and locked Neovim
 plugins plus language servers/parsers. It links configs and backs up replaced
-files under `~/.dotfiles-backup/`. Review existing configs first. Internet access
+files under `~/.dotfiles-backup/`, and adds a global Git hook that strips AI
+co-author lines from every commit ([details](docs/ai.md#no-ai-attribution)).
+Review existing configs first. Internet access
 is required; initial Neovim setup can take a while. It does not change your login
 shell automatically. Install licensed MonoLisa yourself; font files are not included.
 
