@@ -1,16 +1,11 @@
 # Resolve the symlink so the helpers also work from a different checkout path.
 export DOTFILES_DIR="${${(%):-%x}:A:h}"
 # Linux terminals often start a non-login shell, which skips .zprofile.
-[[ -n "${HOMEBREW_PREFIX:-}" ]] || source "$DOTFILES_DIR/.zprofile"
+[[ -n "${HOMEBREW_PREFIX:-}" && -n "${PNPM_HOME:-}" ]] || source "$DOTFILES_DIR/.zprofile"
 export STARSHIP_CONFIG="${STARSHIP_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/starship/starship-core.toml}"
-if [[ "$OSTYPE" == darwin* ]]; then
-  export PNPM_HOME="${PNPM_HOME:-$HOME/Library/pnpm}"
-else
-  export PNPM_HOME="${PNPM_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/pnpm}"
-fi
 typeset -U path fpath
 # Editor-only Mason executables should not override shell/Homebrew tools.
-path=($HOME/.local/bin $PNPM_HOME ${path:#$HOME/.local/share/nvim/mason/bin})
+path=("$HOME/.local/bin" "$PNPM_HOME/bin" "$PNPM_HOME" ${path:#$HOME/.local/share/nvim/mason/bin})
 export PATH
 
 # Completion directories must be registered before compinit.
@@ -18,14 +13,42 @@ for directory in "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh/site-functions" "$
   [[ -d "$directory" ]] && fpath=("$directory" $fpath)
 done
 unset directory
-mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+mkdir -p "$ZSH_CACHE_DIR"
 autoload -Uz compinit
-compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+# The full security/new-file scan runs at most once a day; other shells reuse the dump.
+() {
+  setopt local_options extended_glob
+  local dump="$ZSH_CACHE_DIR/zcompdump"
+  if [[ -n $dump(#qN.mh-24) ]]; then
+    compinit -C -d "$dump"
+  else
+    compinit -d "$dump" && touch "$dump"
+  fi
+}
 zstyle ":completion:*" menu no
 
-# Node versions, fuzzy search and Tab completion.
+# Tool init scripts are cached; a cache is rebuilt when its tool is upgraded
+# (the resolved Homebrew path changes with the version).
+_cached_init() {
+  local name=$1 bin=${commands[$1]} line
+  shift
+  [[ -n $bin ]] || return 0
+  local cache="$ZSH_CACHE_DIR/init-$name.zsh" key="# ${bin:A} $*"
+  [[ -r $cache ]] && read -r line < "$cache"
+  if [[ $line != "$key" ]]; then
+    # Write to a temp file so a failed init never leaves a half-written cache.
+    { print -r -- "$key"; "$@" } >| "$cache.$$" && mv -f "$cache.$$" "$cache" || {
+      rm -f "$cache.$$"
+      return 0
+    }
+  fi
+  source "$cache"
+}
+
+# Node versions, fuzzy search and Tab completion. fnm output is per-shell, so not cached.
 command -v fnm >/dev/null && eval "$(fnm env --use-on-cd --shell zsh)"
-command -v fzf >/dev/null && eval "$(fzf --zsh)"
+_cached_init fzf fzf --zsh
 for plugin in "${HOMEBREW_PREFIX:-/opt/homebrew}/share/fzf-tab/fzf-tab.zsh" "$HOME/.local/share/fzf-tab/fzf-tab.plugin.zsh" /usr/share/fzf-tab/fzf-tab.plugin.zsh; do
   if [[ -r "$plugin" ]]; then source "$plugin"; break; fi
 done
@@ -51,9 +74,10 @@ command -v fd >/dev/null && alias ff="fd"
 command -v rg >/dev/null && alias rgf="rg --smart-case"
 command -v rga >/dev/null && alias pdfgrep="rga"
 command -v lazygit >/dev/null && alias lg="lazygit"
-command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
-command -v atuin >/dev/null && eval "$(atuin init zsh --disable-up-arrow)"
-command -v starship >/dev/null && eval "$(starship init zsh)"
+_cached_init zoxide zoxide init zsh
+_cached_init atuin atuin init zsh --disable-up-arrow
+_cached_init starship starship init zsh
+unfunction _cached_init
 
 prompt-core() {
   export STARSHIP_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/starship/starship-core.toml"
@@ -68,9 +92,10 @@ dot() {
   case "$1" in
     doctor) "$DOTFILES_DIR/scripts/bootstrap.sh" --check ;;
     update) "$DOTFILES_DIR/scripts/update.sh" "${@:2}" ;;
+    ai) python3 "$DOTFILES_DIR/scripts/ai-setup.py" "${@:2}" ;;
     prompt-core) prompt-core ;;
     prompt-languages) prompt-languages ;;
-    *) echo "Usage: dot {doctor|update|prompt-core|prompt-languages}"; return 1 ;;
+    *) echo "Usage: dot {doctor|update|ai|prompt-core|prompt-languages}"; return 1 ;;
   esac
 }
 alias dot-doctor="dot doctor"
@@ -84,3 +109,6 @@ for plugin in "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/z
   if [[ -r "$plugin" ]]; then source "$plugin"; break; fi
 done
 unset plugin
+
+# Machine-specific lines (installer PATH edits, local env) go in this untracked file.
+if [[ -r "$HOME/.zshrc.local" ]]; then source "$HOME/.zshrc.local"; fi
