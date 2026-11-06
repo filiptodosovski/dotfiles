@@ -72,8 +72,10 @@ downloads its engine into `ai/skills/impeccable/scripts/bin/` (git-ignored).
 - **Permissions:** read-only git, `rg`, `ls`, `pnpm test/lint/typecheck` run
   without asking; `rm -rf`, force push, and `reset --hard` always ask. The Read
   tool can't open `.env*`, `~/.ssh`, `~/.aws`, `~/.config/gh`, or agent `auth.json` files.
-- **Sandbox:** Bash commands run in Claude's OS sandbox, which blocks the same
-  paths, so `cat .env` is refused too. `git fetch/pull/push`, `gh`, `docker`, and
+- **Sandbox:** off for now (`sandbox.enabled: false`). When on, Bash commands run
+  in Claude's OS sandbox, which blocks the same paths, so `cat .env` is refused
+  too. Turn it on with `"enabled": true` in `ai/claude/settings.json` and
+  `dot ai --apply`; dev servers also need `sandbox.network.allowLocalBinding: true`. `git fetch/pull/push`, `gh`, `docker`, and
   `open` are excluded because they break inside the macOS sandbox; they run with
   normal access. If another command fails with a sandbox error, add it to
   `sandbox.excludedCommands` in `ai/claude/settings.json` and run `dot ai --apply`.
