@@ -1,0 +1,19 @@
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+*.lua text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+bin/* text eol=lf
+.zshrc text eol=lf
+.zprofile text eol=lf
+ai/skills/impeccable/scripts/impeccable text eol=lf
+
+# Vendored upstream files keep their original whitespace (Markdown hard breaks, recorded hashes).
+ai/skills/** -whitespace
+ai/LICENSE.apache-2.0 -whitespace

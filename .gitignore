@@ -12,3 +12,36 @@
 !.env.example
 auth.json
 mcp-auth.json
+
+.zshrc.local
+
+# AI runtime data belongs on the machine, not in the public setup snapshot.
+node_modules/
+__pycache__/
+.ruff_cache/
+*.pyc
+/ai/**/*.sqlite*
+/ai/**/*.db
+/ai/**/*.db-shm
+/ai/**/*.db-wal
+/ai/**/*.sock
+/ai/**/sessions/
+/ai/**/session-snapshots/
+/ai/**/archived_sessions/
+/ai/**/history.jsonl
+/ai/**/models-store.json
+/ai/**/models.json
+credentials.json
+# Keys and per-machine agent approvals never belong in a public repo.
+*.pem
+*.key
+*.p12
+id_rsa*
+id_ed25519*
+.netrc
+.npmrc
+.envrc
+**/.claude/settings.local.json
+.codex-global-state.json*
+# Skills are symlinked from ~/.claude and ~/.pi, so runtime downloads land here.
+/ai/skills/impeccable/scripts/bin/

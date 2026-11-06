@@ -1,0 +1,12 @@
+# Default gitleaks rules plus one narrow exception.
+[extend]
+useDefault = true
+
+# ai/skills/sources.json records upstream file checksums; the generic-key rule
+# mistakes them for secrets. Only that key, in that file, is exempt.
+[[allowlists]]
+description = "Recorded skill checksums"
+condition = "AND"
+paths = ['''^ai/skills/sources\.json$''']
+regexTarget = "line"
+regexes = ['''"entrySha256": "[0-9a-f]{64}"''']
