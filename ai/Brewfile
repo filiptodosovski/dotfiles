@@ -1,0 +1,6 @@
+# Optional tools for the AI setup; separate from the terminal/editor bootstrap.
+brew "python"
+brew "herdr"
+brew "typescript-language-server" # needed by the Claude typescript-lsp plugin
+# Claude Code and Pi use their own self-updating installers (bootstrap.sh --ai).
+cask "codex"

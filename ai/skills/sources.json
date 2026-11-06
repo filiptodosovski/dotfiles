@@ -1,0 +1,120 @@
+{
+  "installedAt": "2026-10-12T17:07:40.177705+00:00",
+  "skills": {
+    "vercel-react-best-practices": {
+      "repository": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "path": "skills/react-best-practices",
+      "manualOnly": false,
+      "entrySha256": "71ed7794962fa6e803ee83030517b5b93a9f70fbfeb431ec4535c5480a8d8355"
+    },
+    "vercel-composition-patterns": {
+      "repository": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "path": "skills/composition-patterns",
+      "manualOnly": false,
+      "entrySha256": "e38e0eaa609316b10423a9a138ed95e35099accd3f735585295c8a8f165c28a3"
+    },
+    "nodejs-backend-patterns": {
+      "repository": "wshobson/agents",
+      "commit": "46891e7e60da0e52baf1050b7b6391b64e84c6d9",
+      "path": "plugins/javascript-typescript/skills/nodejs-backend-patterns",
+      "manualOnly": false,
+      "entrySha256": "d52e1150accdc27e916f0962c9ba0872fcbe8a7d849d905dcc795c0f9d05aeae"
+    },
+    "modern-javascript-patterns": {
+      "repository": "wshobson/agents",
+      "commit": "46891e7e60da0e52baf1050b7b6391b64e84c6d9",
+      "path": "plugins/javascript-typescript/skills/modern-javascript-patterns",
+      "manualOnly": false,
+      "entrySha256": "32e203b8d944115102986dcb3cf4c48918edc5dbf6942668875970121809c064"
+    },
+    "typescript-advanced-types": {
+      "repository": "wshobson/agents",
+      "commit": "46891e7e60da0e52baf1050b7b6391b64e84c6d9",
+      "path": "plugins/javascript-typescript/skills/typescript-advanced-types",
+      "manualOnly": false,
+      "entrySha256": "c32101c65134d94ef1a3305ef486020b57be6408f97ed952c9c560e3fe04188d"
+    },
+    "javascript-testing-patterns": {
+      "repository": "wshobson/agents",
+      "commit": "46891e7e60da0e52baf1050b7b6391b64e84c6d9",
+      "path": "plugins/javascript-typescript/skills/javascript-testing-patterns",
+      "manualOnly": false,
+      "entrySha256": "d99e1d7344ca7b87395c7e49f6c635ea67fe16d57f4698d72c78d405020f5782"
+    },
+    "codebase-design": {
+      "repository": "mattpocock/skills",
+      "commit": "49dd158d1076134a641b33efb035946536778336",
+      "path": "skills/engineering/codebase-design",
+      "manualOnly": false,
+      "entrySha256": "2c20617f87ec8af6a434859f381b2f061a69b530444e74eb39e78bb016a6d1e2"
+    },
+    "impeccable": {
+      "repository": "pbakaus/impeccable",
+      "commit": "919dbeba520df760a157fe635be62faae88d58da",
+      "path": ".pi/skills/impeccable",
+      "manualOnly": false,
+      "entrySha256": "6344a7618a2362134f22d2b3e469fecfdb8a1e2eade402d5fe63dbd58b4fa429"
+    },
+    "antislop": {
+      "repository": "miqdadbadjuber/anti-slop",
+      "commit": "9685ca7eac70283d083fc23baa9a88e7d3cd93c4",
+      "path": "skills/antislop",
+      "manualOnly": true,
+      "entrySha256": "87dd1deb0dfded24247e06b31054d8e08cbd7775e537723a3fe0ac4554106201"
+    },
+    "antislop-ui": {
+      "repository": "miqdadbadjuber/anti-slop",
+      "commit": "9685ca7eac70283d083fc23baa9a88e7d3cd93c4",
+      "path": "skills/antislop-ui",
+      "manualOnly": true,
+      "entrySha256": "8807bd85911ca787858e29c88d6d0c07c8d2045fe84633a5ba960554f5b4a77e"
+    },
+    "antislop-human": {
+      "repository": "miqdadbadjuber/anti-slop",
+      "commit": "9685ca7eac70283d083fc23baa9a88e7d3cd93c4",
+      "path": "skills/antislop-human",
+      "manualOnly": true,
+      "entrySha256": "1913e58e3737631a74c78d53524e9b68dffb4e535dcfd6554b940c8bd1cafec1",
+      "localCorrections": [
+        "Corrected WCAG large-text threshold: https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html"
+      ]
+    },
+    "antislop-layoutmobile": {
+      "repository": "miqdadbadjuber/anti-slop",
+      "commit": "9685ca7eac70283d083fc23baa9a88e7d3cd93c4",
+      "path": "skills/antislop-layoutmobile",
+      "manualOnly": true,
+      "entrySha256": "31785f126cd2f528b643a27fbc3698ddc8e12fab4b804fb71b02ee74ca79c4e0"
+    },
+    "antislop-copywriting": {
+      "repository": "miqdadbadjuber/anti-slop",
+      "commit": "9685ca7eac70283d083fc23baa9a88e7d3cd93c4",
+      "path": "skills/antislop-copywriting",
+      "manualOnly": true,
+      "entrySha256": "605d3c5beb6f85d3db6b60074fb4194919199c2ad38313cd6367620684e5913e"
+    },
+    "antislop-code": {
+      "repository": "miqdadbadjuber/anti-slop",
+      "commit": "9685ca7eac70283d083fc23baa9a88e7d3cd93c4",
+      "path": "skills/antislop-code",
+      "manualOnly": true,
+      "entrySha256": "414e4fc1ca34953ffecacc5fd5ab71f50e94aa2c1c3b9212bee1961753915ac8"
+    },
+    "grill-me": {
+      "repository": "mattpocock/skills",
+      "commit": "4ae2317ddb22b046e26455e4f9c9b3aaaf62212d",
+      "path": "skills/productivity/grill-me",
+      "manualOnly": true,
+      "entrySha256": "caaf8b8de1684f96e26b28f3c29189db5c89cce4b73e1c93d86164f66ef88637"
+    },
+    "grilling": {
+      "repository": "mattpocock/skills",
+      "commit": "4ae2317ddb22b046e26455e4f9c9b3aaaf62212d",
+      "path": "skills/productivity/grilling",
+      "manualOnly": false,
+      "entrySha256": "a146842ed93ca43d833550fa9adf02e58cb63c83fea9d4b4522995b82242d4e2"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-6.1-sol",
+  "defaultThinkingLevel": "high",
+  "packages": [
+    "npm:pi-powerline-footer@0.20.2",
+    "npm:pi-web-access@0.44.0",
+    "npm:pi-subagents@0.80.0"
+  ],
+  "powerline": {
+    "preset": "default",
+    "welcome": false,
+    "model": {
+      "display": "name"
+    },
+    "path": {
+      "mode": "basename"
+    },
+    "context": {
+      "format": "percent"
+    },
+    "cache_read": {
+      "format": "both"
+    },
+    "cost": {
+      "subscriptionDisplay": "subscription"
+    }
+  }
+}

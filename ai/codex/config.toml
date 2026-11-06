@@ -1,0 +1,8 @@
+# Portable preferences only. Account access determines which models are available.
+model = "gpt-6.1-sol"
+model_reasoning_effort = "high"
+personality = "pragmatic"
+
+[features]
+hooks = true
+js_repl = false
