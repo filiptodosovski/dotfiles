@@ -8,14 +8,19 @@ INSTALL_PACKAGES=false
 DRY_RUN=false
 CHECK_ONLY=false
 LINKS_ONLY=false
+INSTALL_AI=false
 PLATFORM="$(uname -s)"
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
 
 usage() {
   cat <<'USAGE'
-Usage: bootstrap.sh [--packages] [--links-only] [--dry-run] [--check]
+Usage: bootstrap.sh [--packages] [--ai] [--links-only] [--dry-run] [--check]
 
   --packages    Install/upgrade the Brewfile and current Node LTS.
+  --ai          Also set up the AI agents: ai/Brewfile (Herdr, Codex, ...),
+                Claude Code and Pi via their official installers when missing,
+                then link skills and merge settings (scripts/ai-setup.py).
+                With --links-only, only the link/merge step runs.
   --links-only  Create symlinks without downloading packages or plugins.
   --dry-run     Print the plan without changing anything.
   --check       Check links, tools, versions, plugins, parsers and servers.
@@ -29,6 +34,7 @@ USAGE
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --packages) INSTALL_PACKAGES=true ;;
+    --ai) INSTALL_AI=true ;;
     --links-only) LINKS_ONLY=true ;;
     --dry-run) DRY_RUN=true ;;
     --check) CHECK_ONLY=true ;;
@@ -37,7 +43,7 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
-if { $CHECK_ONLY && { $DRY_RUN || $INSTALL_PACKAGES || $LINKS_ONLY; }; } || { $LINKS_ONLY && $INSTALL_PACKAGES; }; then
+if { $CHECK_ONLY && { $DRY_RUN || $INSTALL_PACKAGES || $LINKS_ONLY || $INSTALL_AI; }; } || { $LINKS_ONLY && $INSTALL_PACKAGES; }; then
   echo "--check must be used alone; --links-only cannot be combined with --packages." >&2
   exit 2
 fi
@@ -114,6 +120,32 @@ install_linux_font() {
   unzip -jo "$download/Meslo.zip" 'MesloLGSNerdFontMono-Regular.ttf' -d "$fonts"
   fc-cache -f "$fonts"
   rm -rf "$download"
+}
+
+# Agents and their settings. Logins and API keys are never touched here.
+setup_ai() {
+  # Native installers put claude and pi in ~/.local/bin.
+  export PATH="$HOME/.local/bin:$PATH"
+  if $DRY_RUN; then
+    if ! $LINKS_ONLY; then
+      echo 'would install  ai/Brewfile (Herdr, Python, Codex, TypeScript LSP)'
+      command -v claude >/dev/null 2>&1 || echo 'would install  Claude Code (https://claude.ai/install.sh)'
+      command -v pi >/dev/null 2>&1 || echo 'would install  Pi (https://pi.dev/install.sh)'
+    fi
+    python3 "$DOTFILES_DIR/scripts/ai-setup.py" --dry-run || echo 'would run      scripts/ai-setup.py --apply'
+    return
+  fi
+  if ! $LINKS_ONLY; then
+    command -v brew >/dev/null 2>&1 || { echo 'Install Homebrew first: https://brew.sh' >&2; exit 1; }
+    brew bundle install --file "$DOTFILES_DIR/ai/Brewfile"
+    if ! command -v claude >/dev/null 2>&1; then
+      curl -fsSL https://claude.ai/install.sh | bash
+    fi
+    if ! command -v pi >/dev/null 2>&1; then
+      curl -fsSL https://pi.dev/install.sh | sh
+    fi
+  fi
+  python3 "$DOTFILES_DIR/scripts/ai-setup.py" --apply
 }
 
 # Compare numeric versions without sort -V (not available on stock macOS).
@@ -231,6 +263,7 @@ if $DRY_RUN; then
     echo 'would install  TPM and configured tmux plugins'
     echo 'would restore  locked Neovim plugins and install parsers/servers'
   fi
+  ! $INSTALL_AI || setup_ai
   exit 0
 fi
 if ! $LINKS_ONLY; then
@@ -243,5 +276,7 @@ if ! $LINKS_ONLY; then
   nvim --headless '+Lazy! restore' +qa
   nvim --headless -c 'lua dofile(vim.env.DOTFILES_DIR .. "/scripts/nvim-tools.lua")' -c qall
 fi
+! $INSTALL_AI || setup_ai
 [[ -z "$BACKUP_DIR" ]] || echo "Previous configs are saved in: $BACKUP_DIR"
 echo 'Setup complete. Start a new terminal, or run: exec zsh -l'
+! $INSTALL_AI || echo 'Sign in to each agent on first start (Claude, Codex; Pi: /login).'
