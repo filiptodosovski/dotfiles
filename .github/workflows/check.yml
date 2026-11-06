@@ -1,0 +1,41 @@
+name: Check dotfiles
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  # This repo is public: fail the push if a credential lands in any commit.
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  check:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Test AI setup and status line
+        run: python3 -B -m unittest discover -s tests -v
+      - name: Test WezTerm config on both platforms
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y --no-install-recommends luajit
+          DOTFILES_DIR="$PWD" luajit tests/wezterm-config.lua
+      - name: Check shell syntax and whitespace
+        run: |
+          bash -n scripts/bootstrap.sh scripts/update.sh bin/wt bin/tmux-sessionizer
+          ./scripts/bootstrap.sh --help >/dev/null
+          zsh -n .zshrc .zprofile 2>/dev/null || [ "$RUNNER_OS" = Linux ]
+          sh -n tmux/status.sh ai/claude/notify.sh ai/skills/impeccable/scripts/impeccable
+          git diff --check
