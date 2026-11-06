@@ -1,0 +1,14 @@
+# `topgrade` updates everything: macOS, apps, casks, CLIs, extensions.
+# Neovim and tmux plugins are left to `dot update`, which backs up the Neovim
+# lockfile first and keeps pinned tmux plugins; topgrade runs it as a step below.
+
+[misc]
+# containers: tries to `docker pull` locally built images, which always fails.
+disable = ["containers", "vim", "tmux"]
+
+[git]
+# Topgrade pulls ~/.dotfiles by default; review and pull this repo yourself.
+pull_predefined = false
+
+[commands]
+"Dotfiles (Neovim, tmux, Node LTS, WezTerm nightly)" = "~/.dotfiles/scripts/update.sh"

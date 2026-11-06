@@ -56,6 +56,7 @@ link_specs=(
   "$DOTFILES_DIR/tmux/.tmux.conf|$HOME/.tmux.conf"
   "$DOTFILES_DIR/wezterm|$CONFIG_DIR/wezterm"
   "$DOTFILES_DIR/starship|$CONFIG_DIR/starship"
+  "$DOTFILES_DIR/topgrade/topgrade.toml|$CONFIG_DIR/topgrade.toml"
   "$DOTFILES_DIR/nvim|$CONFIG_DIR/nvim"
   "$DOTFILES_DIR/bin/tmux-sessionizer|$HOME/.local/bin/tmux-sessionizer"
   "$DOTFILES_DIR/bin/wt|$HOME/.local/bin/wt"
